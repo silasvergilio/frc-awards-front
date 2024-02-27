@@ -15,6 +15,8 @@ import Login from "./components/Login";
 import BulkAddTeam from "./components/BulkAddTeam";
 import NonNominated from "./components/NonNominated";
 import Visits from './components/Visits'
+import AddPicture from './components/AddPicture'
+
 import VueMask from "v-mask";
 import Vuex from "vuex";
 import VuexPersistence from "vuex-persist";
@@ -108,6 +110,14 @@ const router = new VueRouter({
     {
       path: "/listTeams",
       component: listTeams,
+      beforeEnter: (to, from, next) => {
+        if (!store.state.user) next("/login");
+        else next();
+      },
+    },
+    {
+      path: "/adicionar-foto",
+      component: AddPicture,
       beforeEnter: (to, from, next) => {
         if (!store.state.user) next("/login");
         else next();

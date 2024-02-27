@@ -103,6 +103,12 @@ export default {
         permission: ["Administrador", "Juiz de Sala"],
       },
       {
+        name: "Adicionar Foto",
+        icon: "mdi-camera",
+        route: "/adicionar-foto",
+        permission: ["Administrador", "Juiz de Sala"],
+      },
+      {
         name: "Lista de Times",
         icon: "mdi-account-badge-horizontal-outline",
         route: "/listTeams",

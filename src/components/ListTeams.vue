@@ -2,7 +2,11 @@
   <div>
     <v-dialog v-model="dialog" max-width="290">
       <v-card>
-        <v-img v-if="this.times.length > 0" :src="srcComputed" />
+        <v-img v-if="this.times.length > 0 && this.times[index].imageLink" :src=this.times[index].imageLink />
+      </v-card>
+
+      <v-card>
+        <v-img v-if="this.times.length > 0 && !this.times[index].imageLink" :src=srcComputed />
       </v-card>
     </v-dialog>
     <!--Dialog de Confirmação -->
@@ -76,7 +80,7 @@ export default {
       console.log("image not working");
     },
     changeIndex: function(newTeam) {
-      this.$store.commit("increment");
+     // this.$store.commit("increment");
 
       for (let k = 0; k < this.times.length; k++) {
         if (newTeam == this.times[k].value) this.index = k;
