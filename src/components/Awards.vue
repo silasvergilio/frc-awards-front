@@ -249,7 +249,7 @@ export default {
         id: this.items[this.awardIndex].teams[this.index].Teams_idTime,
       };
 
-      var uri = "";
+      var url = "";
       switch (this.items[this.awardIndex].value) {
         case 1:
           url = `${this.serverDomain}/awards/Autonomous`;
@@ -295,7 +295,7 @@ export default {
           break;
       }
 
-      fetch(uri, {
+      fetch(url, {
         method: "DELETE",
         body: JSON.stringify(requisicao),
         headers: {
@@ -303,7 +303,8 @@ export default {
         },
       }).then(() => {
         this.loader = false;
-        location.reload();
+        this.items[this.awardIndex].teams.splice(this.index, 1)
+       // location.reload();
       });
     },
 
