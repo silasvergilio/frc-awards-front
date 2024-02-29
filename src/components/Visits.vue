@@ -86,7 +86,7 @@ export default {
       this.loader = true;
       var requisicao = {
         visit: visitType,
-        newValue: item.visitedMCI,
+        newValue: visitType == 'visitedMCI' ? item.visitedMCI : visitType == 'visitedTA' ? item.visitedTA : item.visitedExtra,
       };
 
       fetch(`${this.serverDomain}/teams/${item.value}`, {
