@@ -191,6 +191,11 @@ export default {
       .then((json) => {
         this.loader = false;
         this.times = json;
+
+        this.times.forEach( (element) => {
+          element.text = `${element.text}-${element.value}`
+        } )
+      
       })
       .catch(() => {});
 
