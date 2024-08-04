@@ -15,9 +15,9 @@
           <tr>
             <th class="text-left">Nome</th>
             <th class="text-left">Número</th>
-            <th>Visita MCI</th>
-            <th>Visita TA</th>
-            <th>Visita Extra</th>
+            <th>Visita Dia 1</th>
+            <th>Visita Dia 2 - 1</th>
+            <th>Visita Dia 2 - 2</th>
           </tr>
         </thead>
         <tbody>

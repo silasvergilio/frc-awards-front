@@ -1,49 +1,30 @@
 <template>
   <v-form ref="form">
     <v-container fluid>
-      <CardTitlePage
-        titulo="Adicionar Foto"
-        icon="mdi-file-tree"
-        body="Indicar um time a um prêmio. Lembre-se de seguir as instruções do Juiz-Chefe quanto 
-        a quantidade, critérios e metodologia"
-      >
+      <CardTitlePage titulo="Adicionar Foto" icon="mdi-file-tree" body="Indicar um time a um prêmio. Lembre-se de seguir as instruções do Juiz-Chefe quanto 
+        a quantidade, critérios e metodologia">
       </CardTitlePage>
 
       <Loader v-bind:overlay="loader"> </Loader>
 
       <v-row>
         <v-col cols="12" md="12">
-          <v-combobox
-            v-model="team"
-            :items="times"
-            label="Selecione o time"
-          ></v-combobox>
+          <v-combobox v-model="team" :items="times" label="Selecione o time"></v-combobox>
         </v-col>
       </v-row>
 
       <v-row>
         <v-col cols="12" md="12">
           <v-container fluid>
-            <v-file-input
-              @change="onFileChange"
-              prepend-icon="mdi-camera"
-              accept="image/*"
-              label="Anexar imagem"
-            ></v-file-input>
+            <v-file-input @change="onFileChange" prepend-icon="mdi-camera" accept="image/*"
+              label="Anexar imagem"></v-file-input>
           </v-container>
         </v-col>
       </v-row>
 
       <v-row>
         <v-col cols="12" md="4">
-          <v-btn
-            @click="addPhoto()"
-            color="#1E5AA8"
-            depressed
-            elevation="5"
-            outlined
-            :disabled="!invalid"
-          >
+          <v-btn @click="addPhoto()" color="#1E5AA8" depressed elevation="5" outlined :disabled="!invalid">
             Enviar
           </v-btn>
         </v-col>
@@ -80,7 +61,7 @@ export default {
       formData.append("bodyReq", JSON.stringify(requisicao));
 
       // window.alert(JSON.stringify(requisicao));
-     var url = `${this.serverDomain}/teams/picture`;
+      var url = `${this.serverDomain}/teams/picture`;
 
       axios
         .post(url, formData)
@@ -134,14 +115,8 @@ export default {
         { text: "Team Sustainability", value: 13 },
       ],
       salas: [
-        { text: "Luis / Alexandre" },
-        { text: "Carlos / Lubia" },
-        { text: "Karine / Pedro" },
-        { text: "Vitoria / Silvio" },
-        { text: "Filipe / Daniel" },
-        { text: "Igor / Gabriel" },
-        { text: "Jean / Roger" },
-        { text: "Andrea / Fernanda" },
+        { text: "Lubia / William" },
+        { text: "Danielly / Flaudilenio" },
       ],
 
       message: "",
@@ -163,7 +138,7 @@ export default {
   },
   computed: {
     invalid() {
-     return this.team;
+      return this.team;
     },
   },
   created() {
@@ -177,9 +152,9 @@ export default {
 
         this.times = json;
 
-        this.times.forEach( (element) => {
+        this.times.forEach((element) => {
           element.text = `${element.text}-${element.value}`
-        } )
+        })
       });
   },
 };
