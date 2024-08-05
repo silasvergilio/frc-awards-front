@@ -182,46 +182,46 @@ export default {
         teams: [],
         value: 4,
       },
-      // {
-      //   name: "Innovation in Control",
-      //   teams: [],
-      //   value: 5,
-      // },
-      // {
-      //   name: "Quality",
-      //   teams: [],
-      //   value: 6,
-      // },
+      {
+        name: "Innovation in Control",
+        teams: [],
+        value: 5,
+      },
+      {
+        name: "Quality",
+        teams: [],
+        value: 6,
+      },
       {
         name: "Engineering Inspiration",
         teams: [],
         value: 7,
       },
-      // {
-      //   name: "Gracious Professionalism",
-      //   teams: [],
-      //   value: 8,
-      // },
-      // {
-      //   name: "Imagery",
-      //   teams: [],
-      //   value: 9,
-      // },
-      // {
-      //   name: "Judges",
-      //   teams: [],
-      //   value: 10,
-      // },
+      {
+        name: "Gracious Professionalism",
+        teams: [],
+        value: 8,
+      },
+      {
+        name: "Imagery",
+        teams: [],
+        value: 9,
+      },
+      {
+        name: "Judges",
+        teams: [],
+        value: 10,
+      },
       {
         name: "Rookie All-Star",
         teams: [],
         value: 11,
       },
-      // {
-      //   name: "Rookie Inspiration",
-      //   teams: [],
-      //   value: 12,
-      // },
+      {
+        name: "Rookie Inspiration",
+        teams: [],
+        value: 12,
+      },
       {
         name: "Team Spirit",
         teams: [],
