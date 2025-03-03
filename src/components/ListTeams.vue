@@ -55,7 +55,7 @@ export default {
       loader: false,
       serverDomain: window.location.host.includes("localhost")
         ? "http://localhost:3000"
-        : process.env.SERVER_DOMAIN,
+        : process.env.VUE_APP_SERVER_DOMAIN,
     };
   },
   computed: {

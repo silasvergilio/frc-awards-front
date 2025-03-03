@@ -107,7 +107,7 @@ export default {
       },
       password: "",
       userName: "",
-      serverDomain: window.location.host.includes('localhost') ? "http://localhost:3000" : process.env.SERVER_DOMAIN,
+      serverDomain: window.location.host.includes('localhost') ? "http://localhost:3000" : process.env.VUE_APP_SERVER_DOMAIN,
     };
   },
   components: {
