@@ -107,7 +107,7 @@ export default {
       },
       password: "",
       userName: "",
-      serverDomain: window.location.host.includes('localhost') ? "http://localhost:3000" : "https://frc-awards-server-9337a2478636.herokuapp.com",
+      serverDomain: window.location.host.includes('localhost') ? "http://localhost:3000" : process.env.SERVER_DOMAIN,
     };
   },
   components: {

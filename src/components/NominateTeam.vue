@@ -163,7 +163,7 @@ export default {
       loader: false,
       serverDomain: window.location.host.includes("localhost")
         ? "http://localhost:3000"
-        : "https://frc-awards-server-9337a2478636.herokuapp.com",
+        :process.env.SERVER_DOMAIN,
       premios: [
         { text: "Autonomous", value: 1 },
         { text: "Creativity", value: 2 },
