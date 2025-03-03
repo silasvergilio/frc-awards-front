@@ -32,7 +32,7 @@
               changeIndex(item.value);
             "
           >
-            <td>{{ item.text }} <v-icon v-if="item.value >= 9400">mdi-star</v-icon> </td>
+            <td>{{ item.text }} <v-icon v-if="item.value >= 10000">mdi-star</v-icon> </td>
             <td>{{ item.value }}</td>
             <td>{{ item.state }}</td>
            
@@ -67,7 +67,7 @@ export default {
           this.times[index].value +
           ".jpg");
       } catch {
-        return require("../assets/fotos_times/standard.png");
+        return require("../assets/fotos_times/standard.webp");
       }
     },
   },
@@ -77,7 +77,6 @@ export default {
   methods: {
     imageError: function() {
       /* eslint-disable*/
-      console.log("image not working");
     },
     changeIndex: function(newTeam) {
      // this.$store.commit("increment");
@@ -90,7 +89,7 @@ export default {
 
   created() {
     this.loader = true;
-    fetch(`${this.serverDomain}/teams`, {
+    fetch(`${this.serverDomain}/teams?image=true`, {
       credentials: "include",
     })
       .then((response) => response.json())

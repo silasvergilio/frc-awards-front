@@ -77,7 +77,7 @@ export default {
           this.times[index].value +
           ".jpg");
       } catch {
-        return require("../assets/fotos_times/standard.png");
+        return require("../assets/fotos_times/standard.webp");
       }
     },
   },

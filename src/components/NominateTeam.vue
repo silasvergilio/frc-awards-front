@@ -1,39 +1,23 @@
 <template>
   <v-form ref="form">
     <v-container fluid>
-      <CardTitlePage
-        titulo="Nomear time a um prêmio"
-        icon="mdi-file-tree"
-        body="Indicar um time a um prêmio. Lembre-se de seguir as instruções do Juiz-Chefe quanto 
-      a quantidade, critérios e metodologia"
-      >
+      <CardTitlePage titulo="Nomear time a um prêmio" icon="mdi-file-tree" body="Indicar um time a um prêmio. Lembre-se de seguir as instruções do Juiz-Chefe quanto 
+      a quantidade, critérios e metodologia">
       </CardTitlePage>
 
       <Loader v-bind:overlay="loader"> </Loader>
 
       <v-row>
         <v-col cols="12" md="4">
-          <v-combobox
-            v-model="team"
-            :items="times"
-            label="Selecione o time"
-          ></v-combobox>
+          <v-combobox v-model="team" :items="times" label="Selecione o time"></v-combobox>
         </v-col>
 
         <v-col cols="12" md="4">
-          <v-combobox
-            v-model="award"
-            :items="premios"
-            label="Selecione o prêmio"
-          ></v-combobox>
+          <v-combobox v-model="award" :items="premios" label="Selecione o prêmio"></v-combobox>
         </v-col>
 
         <v-col cols="12" md="4">
-          <v-combobox
-            v-model="room"
-            :items="salas"
-            label="Selecione a Dupla"
-          ></v-combobox>
+          <v-combobox v-model="room" :items="salas" label="Selecione a Dupla"></v-combobox>
         </v-col>
       </v-row>
 
@@ -48,32 +32,22 @@
       <v-row>
         <v-col cols="12" md="12">
           <v-container fluid>
-            <v-file-input
-              @change="onFileChange"
-              prepend-icon="mdi-camera"
-              accept="image/*"
-              label="Anexar imagem"
-            ></v-file-input>
+            <v-file-input @change="onFileChange" prepend-icon="mdi-camera" accept="image/*"
+              label="Anexar imagem"></v-file-input>
           </v-container>
         </v-col>
       </v-row>
 
       <v-row>
         <v-col cols="12" md="4">
-          <v-btn
-            @click="indicaTime()"
-            color="#1E5AA8"
-            depressed
-            elevation="5"
-            outlined
-            :disabled="!invalid"
-          >
+          <v-btn @click="indicaTime()" color="#1E5AA8" depressed elevation="5" outlined :disabled="!invalid">
             Enviar
           </v-btn>
         </v-col>
       </v-row>
     </v-container>
   </v-form>
+
 </template>
 
 <script>
@@ -195,14 +169,14 @@ export default {
         { text: "Creativity", value: 2 },
         { text: "Excellence in Engineering", value: 3 },
         { text: "Industrial Design", value: 4 },
-        // { text: "Innovation in Control", value: 5 },
-        // { text: "Quality", value: 6 },
+        { text: "Innovation in Control", value: 5 },
+        { text: "Quality", value: 6 },
         { text: "Engineering Inspiration", value: 7 },
-        // { text: "Gracious Professionalism", value: 8 },
-        // { text: "Imagery", value: 9 },
-        // { text: "Jdges", value: 10 },
+        { text: "Gracious Professionalism", value: 8 },
+        { text: "Imagery", value: 9 },
+        { text: "Judges", value: 10 },
         { text: "Rookie All-Star", value: 11 },
-       // { text: "Rookie Inspiration", value: 12 },
+        { text: "Rising All Star", value: 12 },
         { text: "Team Spirit", value: 13 },
         { text: "Team Sustainability", value: 14 },
       ],

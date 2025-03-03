@@ -15,9 +15,9 @@
           <tr>
             <th class="text-left">Nome</th>
             <th class="text-left">Número</th>
-            <th>Visita Dia 1</th>
-            <th>Visita Dia 2 - 1</th>
-            <th>Visita Dia 2 - 2</th>
+            <th>Visita AE</th>
+            <th>Visita MCI</th>
+            <th>Visita Extra</th>
           </tr>
         </thead>
         <tbody>
@@ -74,7 +74,7 @@ export default {
           this.times[index].value +
           ".jpg");
       } catch {
-        return require("../assets/fotos_times/standard.png");
+        return require("../assets/fotos_times/standard.webp");
       }
     },
   },

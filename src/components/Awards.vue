@@ -20,7 +20,7 @@
             :src="items[awardIndex].teams[index].imageLink"
           />
 
-          <v-card-text v-if="items[0].teams[0]">
+          <v-card-text v-if="items[awardIndex].teams[index]">
             <b>Indicado por:</b> {{ items[awardIndex].teams[index].judge }}
             <br />
             <b> Descrição </b>
@@ -115,7 +115,7 @@
         fab
         dark
         large
-        color="teal darken-3"
+        color="#F5E565"
       >
         <v-icon dark>mdi-google-spreadsheet</v-icon>
       </v-btn>
@@ -142,7 +142,7 @@ export default {
           this.times[index].value +
           ".jpg");
       } catch {
-        return require("../assets/fotos_times/standard.png");
+        return require("../assets/fotos_times/standard.webp");
       }
     },
   },
@@ -218,7 +218,7 @@ export default {
         value: 11,
       },
       {
-        name: "Rookie Inspiration",
+        name: "Rising All-Star",
         teams: [],
         value: 12,
       },

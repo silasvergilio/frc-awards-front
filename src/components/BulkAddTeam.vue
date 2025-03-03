@@ -3,7 +3,7 @@
     <CardTitlePage
       titulo=""
       icon="mdi-folder-check"
-      body="Adiciona todos os times que estão no FTC EVENTS ao sistema"
+      body="Adiciona todos os times que estão no FRC EVENTS ao sistema"
     >
     </CardTitlePage>
     <div>

@@ -32,14 +32,14 @@
             padding-top: 10rem;
           "
         >
-          <v-img style="max-width: 50%" :src="require('./assets/logo.png')" />
+          <v-img style="max-width: 50%" :src="require('./assets/logo.png.webp')" />
         </div>
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app color="#059A56" dark>
+    <v-app-bar app color="#0083AE" dark>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title>FRC - Crescendo</v-toolbar-title>
+      <v-toolbar-title>FRC - Reefscape</v-toolbar-title>
 
       <v-spacer></v-spacer>
       <p v-if="this.$store.state.user" class="font-weight-bold">
@@ -50,8 +50,8 @@
     <v-content>
       <router-view></router-view>
     </v-content>
-    <v-footer color="#5CCB83" app>
-      <span class="white--text">&copy; 2024 Silas dos Santos Vergilio</span>
+    <v-footer color="#ABD8E7" app>
+      <span class="white--text">&copy; 2025 - Silver Tech</span>
     </v-footer>
   </v-app>
 </template>
@@ -88,7 +88,7 @@ export default {
         name: "Adicionar Usuário",
         icon: "mdi-account-multiple-plus",
         route: "/adduser",
-        permission: ["Administrador"],
+        permission: [""],
       },
       {
         name: "Adicionar Time",
