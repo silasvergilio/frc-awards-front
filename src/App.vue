@@ -88,7 +88,7 @@ export default {
         name: "Adicionar Usuário",
         icon: "mdi-account-multiple-plus",
         route: "/adduser",
-        permission: [""],
+        permission: ["Administrador"],
       },
       {
         name: "Adicionar Time",

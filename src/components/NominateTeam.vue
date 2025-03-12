@@ -181,8 +181,14 @@ export default {
         { text: "Team Sustainability", value: 14 },
       ],
       salas: [
-        { text: "Lubia / William" },
-        { text: "Danielly / Flaudilenio" },
+        { text: "Daniel / Andrea" },
+        { text: "Igor / Vitor" },
+        { text: "Roger / Flaudilenio" },
+        { text: "Gabriel / Carlos" },
+        { text: "Jean / Felipe" },
+        { text: "Lubia / Anderson" },
+        { text: "Luis / Karine" },
+        { text: "Pedro / Marcelo" },
       ],
 
       message: "",
