@@ -189,6 +189,7 @@ export default {
         { text: "Lubia / Anderson" },
         { text: "Luis / Karine" },
         { text: "Pedro / Marcelo" },
+        { text: "Eduardo"}
       ],
 
       message: "",
