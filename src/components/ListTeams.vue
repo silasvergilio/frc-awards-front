@@ -94,8 +94,10 @@ export default {
     })
       .then((response) => response.json())
       .then((json) => {
+
         this.loader = false;
         this.times = json;
+        this.times = this.times.sort((a, b) => Number(a.preco) - Number(b.preco));
       })
       .catch(() => {});
   },
