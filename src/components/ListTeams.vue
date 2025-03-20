@@ -97,7 +97,8 @@ export default {
 
         this.loader = false;
         this.times = json;
-        this.times = this.times.sort((a, b) => Number(a.preco) - Number(b.preco));
+        this.times.sort((a, b) => Number(a.value) - Number(b.value));
+        console.log("LISTA TIMES SORT", this.times)
       })
       .catch(() => {});
   },
