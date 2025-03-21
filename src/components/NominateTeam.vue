@@ -187,6 +187,7 @@ export default {
         { text: "Arnaldo / Sara" },
         { text: "Erika / Juliane" },
         { text: "Nathalia / Gidalia" },
+        { text: "Match Observer" },
       ],
 
       message: "",
