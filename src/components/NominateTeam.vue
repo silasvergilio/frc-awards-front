@@ -188,6 +188,7 @@ export default {
         { text: "Erika / Juliane" },
         { text: "Nathalia / Gidalia" },
         { text: "Match Observer" },
+        { text: "Outros"}
       ],
 
       message: "",
@@ -222,6 +223,9 @@ export default {
       .then((json) => {
         this.loader = false;
         this.times = json;
+        this.times.forEach((element) => {
+          element.text = element.value + " - " + element.text;
+        }); 
       });
   },
 };
