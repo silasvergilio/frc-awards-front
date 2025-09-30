@@ -29,14 +29,14 @@
         </v-col>
       </v-row>
 
-      <v-row>
+      <!-- <v-row>
         <v-col cols="12" md="12">
           <v-container fluid>
             <v-file-input @change="onFileChange" prepend-icon="mdi-camera" accept="image/*"
               label="Anexar imagem"></v-file-input>
           </v-container>
         </v-col>
-      </v-row>
+      </v-row> -->
 
       <v-row>
         <v-col cols="12" md="4">
@@ -181,12 +181,10 @@ export default {
         { text: "Team Sustainability", value: 14 },
       ],
       salas: [
-        { text: "Yuri / Thiago" },
-        { text: "Eduardo / Ayslan" },
-        { text: "Arthur / Kleber" },
-        { text: "Arnaldo / Sara" },
-        { text: "Erika / Juliane" },
-        { text: "Nathalia / Gidalia" },
+        { text: "Kayan / Gilvan / Sabrina" },
+        { text: "Giovanni / Valter / Carlos" },
+        { text: "Karina / Carol / Nathalia" },
+        { text: "Silvio / Kelen" },
         { text: "Match Observer" },
         { text: "Outros"}
       ],
