@@ -84,7 +84,7 @@ export default {
     return {
       serverDomain: window.location.host.includes("localhost")
         ? "http://localhost:3000"
-        : process.env.process.env.VUE_APP_SERVER_DOMAIN,
+        : process.env.VUE_APP_SERVER_DOMAIN,
       teamNumber: "",
       teamName: "",
       school: "",
