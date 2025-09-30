@@ -149,6 +149,7 @@ export default {
       if (!this.$store.state.user) {
         if (this.menuItens.indexOf(this.menuItens[0] === -1))
           allowedMenuItems.push(this.menuItens[0]);
+          allowedMenuItems.push(this.menuItens[1]);
       }
       this.menuItens.forEach((menuItem) => {
         if (this.$store.state.user) {
