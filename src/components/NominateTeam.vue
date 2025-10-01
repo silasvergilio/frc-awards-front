@@ -183,7 +183,7 @@ export default {
       salas: [
         { text: "Kayan / Gilvan / Sabrina" },
         { text: "Giovanni / Valter / Carlos" },
-        { text: "Karina / Carol / Nathalia" },
+        { text: "Karine / Carol / Nathalia" },
         { text: "Silvio / Kelen" },
         { text: "Match Observer" },
         { text: "Outros"}
