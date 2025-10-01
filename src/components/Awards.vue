@@ -163,37 +163,37 @@ export default {
 
     items: [
       {
-        name: "Autonomous",
+        name: "Destaque em Autônomo",
         teams: [],
         value: 1,
       },
       {
-        name: "Creativity",
+        name: "Criatividade",
         teams: [],
         value: 2,
       },
       {
-        name: "Excellence in Engineering",
+        name: "Destaque em Engenharia",
         teams: [],
         value: 3,
       },
       {
-        name: "Industrial Design",
+        name: "Destaque em Design",
         teams: [],
         value: 4,
       },
       {
-        name: "Innovation in Control",
+        name: "Destaque em Controle",
         teams: [],
         value: 5,
       },
       {
-        name: "Quality",
+        name: "Destaque em Qualidade",
         teams: [],
         value: 6,
       },
       {
-        name: "Engineering Inspiration",
+        name: "SESI de Inspiração para Engenharia",
         teams: [],
         value: 7,
       },
@@ -208,12 +208,12 @@ export default {
         value: 9,
       },
       {
-        name: "Judges",
+        name: "Jurados",
         teams: [],
         value: 10,
       },
       {
-        name: "Rookie All-Star",
+        name: "Equipe Iniciante Destaque",
         teams: [],
         value: 11,
       },
@@ -228,7 +228,7 @@ export default {
         value: 13,
       },
       {
-        name: "Team Sustainability",
+        name: "Equipe Sustentável",
         teams: [],
         value: 14,
       },
