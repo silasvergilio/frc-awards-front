@@ -1,244 +1,178 @@
 <template>
-  <validation-observer ref="observer" v-slot="{ invalid }">
-    <v-form ref="form">
-      <v-dialog v-model="dialog" max-width="290">
-        <v-card>
-          <v-card-title class="headline">
-            {{ dialogMessage.title }}
-          </v-card-title>
+  <v-container>
+    <v-card class="mx-auto" max-width="500">
+      <CardTitlePage
+        titulo="Adicionar Usuário"
+        icon="mdi-account-multiple-plus"
+        body="Adicionar um usuário ao sistema."
+      />
 
-          <v-img :src="require('../assets/warning.png')" />
+      <form @submit.prevent="handleSubmit(onSubmit)">
+        <v-row>
+          <!-- Nome completo -->
+          <v-col cols="12" md="6">
+            <v-text-field
+              label="Nome completo"
+              v-model="fields.name.value"
+              :error-messages="fields.name.errors"
+              prepend-icon="mdi-account-edit"
+            />
+          </v-col>
 
-          <v-card-text>
-            {{ dialogMessage.message }}
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-      <!--Dialog de Confirmação -->
+          <!-- Nome de usuário -->
+          <v-col cols="12" md="6">
+            <v-text-field
+              label="Nome do Usuário"
+              v-model="fields.userName.value"
+              :error-messages="fields.userName.errors"
+              prepend-icon="mdi-card-text-outline"
+            />
+          </v-col>
 
-      <v-container>
-        <CardTitlePage
-          titulo="Adicionar Usuario"
-          icon="mdi-account-multiple-plus"
-          body="Adicionar um usuário ao sistema."
+          <!-- Senha -->
+          <v-col cols="12" md="6">
+            <v-text-field
+              label="Senha"
+              v-model="fields.password.value"
+              :error-messages="fields.password.errors"
+              type="password"
+              prepend-icon="mdi-lock-question"
+            />
+          </v-col>
+
+          <!-- Confirma senha -->
+          <v-col cols="12" md="6">
+            <v-text-field
+              label="Repita a senha"
+              v-model="fields.repeatPassword.value"
+              :error-messages="fields.repeatPassword.errors"
+              type="password"
+              prepend-icon="mdi-lock-question"
+            />
+          </v-col>
+
+          <!-- Permissão -->
+          <v-col cols="12" md="6">
+            <v-combobox
+              label="Selecione a permissão"
+              v-model="fields.permission.value"
+              :items="possiblePermissions"
+              :error-messages="fields.permission.errors"
+            />
+          </v-col>
+        </v-row>
+
+        <v-btn
+          type="submit"
+          color="#1E5AA8"
+          depressed
+          outlined
+          :disabled="!isValid"
         >
-        </CardTitlePage>
+          Adicionar
+        </v-btn>
+      </form>
+    </v-card>
 
-        <v-row>
-          <v-container class="container-inputs">
-            <v-col>
-              <validation-provider
-                v-slot="{ errors }"
-                name="Nome Completo"
-                rules="required"
-              >
-                <v-text-field
-                  prepend-icon="mdi-account-edit"
-                  label="Nome completo"
-                  :error-messages="errors"
-                  v-model="name"
-                ></v-text-field>
-              </validation-provider>
-            </v-col>
-            <v-col>
-              <validation-provider
-                v-slot="{ errors }"
-                name="Nome de Usuário"
-                rules="required"
-              >
-                <v-text-field
-                  prepend-icon="mdi-card-text-outline"
-                  label="Nome do Usuário"
-                  :error-messages="errors"
-                  v-model="userName"
-                ></v-text-field>
-              </validation-provider>
-            </v-col>
+    <!-- Loader -->
+    <Loader :overlay="loader" />
 
-            <v-col>
-              <validation-provider
-                v-slot="{ errors }"
-                name="Senha"
-                rules="required"
-              >
-                <v-text-field
-                  :error-messages="errors"
-                  label="Senha"
-                  prepend-icon="mdi-lock-question"
-                  v-model="password"
-                  type="password"
-                ></v-text-field>
-              </validation-provider>
-            </v-col>
-
-            <v-col>
-              <validation-provider
-                v-slot="{ errors }"
-                name="Confirmação Senha"
-                rules="required"
-              >
-                <v-text-field
-                  :error-messages="errors"
-                  label="Repita a senha"
-                  prepend-icon="mdi-lock-question"
-                  v-model="repeatPassword"
-                  type="password"
-                ></v-text-field>
-              </validation-provider>
-            </v-col>
-          </v-container>
-        </v-row>
-        <v-row>
-          <v-container class="container-inputs">
-            <v-col>
-              <validation-provider
-                v-slot="{ errors }"
-                name="Permissão"
-                rules="required"
-              >
-                <v-combobox
-                  v-model="permission"
-                  :error-messages="errors"
-                  :items="possiblePermissions"
-                  label="Selecione a permissão"
-                ></v-combobox>
-              </validation-provider>
-            </v-col>
-
-            <v-col cols="12" md="12">
-              <v-btn
-                :disabled="invalid"
-                color="#1E5AA8"
-                depressed
-                elevation="5"
-                outlined
-                v-on:click="
-                  adicionaUsuario(
-                    name,
-                    userName,
-                    password,
-                    repeatPassword,
-                    permission
-                  )
-                "
-              >
-                Adicionar
-              </v-btn>
-            </v-col>
-          </v-container>
-        </v-row>
-      </v-container>
-    </v-form>
-  </validation-observer>
+    <!-- Dialog -->
+    <v-dialog v-model="dialog" max-width="290">
+      <v-card>
+        <v-card-title class="headline">{{ dialogMessage.title }}</v-card-title>
+        <v-img :src="require('../assets/warning.png')" />
+        <v-card-text>{{ dialogMessage.message }}</v-card-text>
+      </v-card>
+    </v-dialog>
+  </v-container>
 </template>
 
-<style scoped>
-/* .container-inputs {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-} */
-</style>
-
 <script>
+import { ref } from "vue";
+import Loader from "./Loader.vue";
 import CardTitlePage from "./CardTitlePage";
-import { required } from "vee-validate/dist/rules";
-import { ValidationObserver, ValidationProvider, extend } from "vee-validate";
-
-extend("required", {
-  ...required,
-  message: "{_field_} não pode ser vazio",
-});
+import { useForm, useField } from "vee-validate";
+import * as yup from "yup";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 
 export default {
-  data() {
-    return {
-      valid: false,
-      dialog: false,
-      dialogMessage: {
-        title: "",
-        message: "",
-      },
-      password: "",
-      repeatPassword: "",
-      userName: "",
-      permission: "",
-      possiblePermissions: ["Administrador", "Juiz de Sala"],
-      name: "",
-      serverDomain: window.location.host.includes('localhost') ? "http://localhost:3000" : process.env.VUE_APP_SERVER_DOMAIN,      
-    };
-  },
-  components: {
-    CardTitlePage,
-    ValidationObserver,
-    ValidationProvider,
-  },
+  components: { Loader, CardTitlePage },
 
-  methods: {
-    UserException(message, serverError) {
-      this.message = message;
-      this.name = "UserException";
-      this.sqlError = serverError;
-    },
-    adicionaUsuario: function (
-      name,
-      userName,
-      password,
-      repeatPassword,
-      permission
-    ) {
-      var requisicao = {
-        name: name,
-        userName: userName,
-        password: password,
-        repeatPassword: repeatPassword,
-        permission: permission,
-      };
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    const loader = ref(false);
+    const dialog = ref(false);
+    const dialogMessage = ref({ title: "", message: "" });
 
-      // this.$refs.observer.validate();
+    const serverDomain = window.location.host.includes("localhost")
+      ? "http://localhost:3000"
+      : process.env.VUE_APP_SERVER_DOMAIN;
 
-      fetch(`${this.serverDomain}/users`, {
-        method: "post",
-        body: JSON.stringify(requisicao),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => {
-          /* eslint-disable*/
-          return response.json();
-        })
-        .then((response) => {
-          /* eslint-disable*/
-          if (response.SqlError) {
-            if (response.SqlError.errno == 1062) {
-              throw new this.UserException(
-                "Usuario já existe !",
-                response.SqlError
-              );
-            } else if (response.SqlError && response.SqlError.errno == 1162) {
-              throw new this.UserException(
-                "Senhas não conferem !",
-                response.SqlError
-              );
-            }
-          }
-        })
-        .catch((err) => {
-          /* eslint-disable*/
-          this.dialog = true;
-          this.dialogMessage.title = "Erro";
-          this.dialogMessage.message = err.message;
+    const possiblePermissions = ["Administrador", "Juiz de Sala"];
+
+    // Form validation
+    const { handleSubmit, isValid } = useForm();
+
+    const name = useField("name", yup.string().required("Nome completo é obrigatório"));
+    const userName = useField("userName", yup.string().required("Nome de usuário é obrigatório"));
+    const password = useField("password", yup.string().required("Senha é obrigatória"));
+    const repeatPassword = useField("repeatPassword", yup.string().required("Confirmação é obrigatória"));
+    const permission = useField("permission", yup.string().required("Permissão é obrigatória"));
+
+    const fields = { name, userName, password, repeatPassword, permission };
+
+    const onSubmit = async (values) => {
+      loader.value = true;
+      try {
+        if (values.password !== values.repeatPassword) {
+          throw new Error("Senhas não conferem!");
+        }
+
+        const requisicao = {
+          name: values.name,
+          userName: values.userName,
+          password: values.password,
+          repeatPassword: values.repeatPassword,
+          permission: values.permission,
+        };
+
+        const response = await fetch(`${serverDomain}/users`, {
+          method: "POST",
+          body: JSON.stringify(requisicao),
+          headers: { "Content-Type": "application/json" },
         });
-      this.name = "";
-      this.userName = "";
-      this.password = "";
-      this.repeatPassword = "";
-      this.permission = "";
-      this.$refs.observer.reset();
-    },
+
+        const res = await response.json();
+        loader.value = false;
+
+        if (res.SqlError) {
+          if (res.SqlError.errno === 1062) {
+            throw new Error("Usuário já existe!");
+          } else if (res.SqlError.errno === 1162) {
+            throw new Error("Senhas não conferem!");
+          }
+        }
+
+        // Limpar campos após sucesso
+        Object.values(fields).forEach(f => f.value.value = "");
+        dialogMessage.value = { title: "Sucesso", message: "Usuário adicionado!" };
+        dialog.value = true;
+
+      } catch (err) {
+        loader.value = false;
+        dialogMessage.value = { title: "Erro", message: err.message };
+        dialog.value = true;
+      }
+    };
+
+    return { fields, handleSubmit, isValid, loader, dialog, dialogMessage, possiblePermissions, onSubmit };
   },
 };
 </script>
 
-
+<style scoped>
+/* Ajuste seu estilo aqui */
+</style>

@@ -1,87 +1,92 @@
 <template>
   <v-container class="center-button">
     <CardTitlePage
-      titulo=""
+      titulo="Adicionar Times"
       icon="mdi-folder-check"
-      body="Adiciona todos os times que estão no FRC EVENTS ao sistema"
+      body="Adiciona todos os times que estão no FRC EVENTS ao sistema."
+    />
+
+    <Loader :overlay="loader" />
+
+    <v-btn
+      class="add-button"
+      color="#1E5AA8"
+      variant="outlined"
+      elevation="3"
+      @click="bulkAddTeam"
+      :loading="loader"
     >
-    </CardTitlePage>
-    <div>
-    <v-btn class="add-button" variant="outlined" @click="bulkAddTeam()">
       Adicionar Times
     </v-btn>
-    </div>
   </v-container>
 </template>
 
-<style>
-.add-button{
-    margin-top: 2rem;
-}
+<style scoped>
 .center-button {
   display: flex;
-  justify-content: center;
-  align-content: center;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  font-family: 'Roboto', sans-serif;
+  text-align: center;
+  padding-top: 3rem;
+}
+
+.add-button {
+  margin-top: 2rem;
+  font-weight: 500;
+  font-size: 1.1rem;
+  transition: all 0.25s ease;
+  border-color: #1e5aa8;
+  color: #1e5aa8;
+}
+
+.add-button:hover {
+  background-color: #1e5aa8;
+  color: white;
+  transform: scale(1.03);
 }
 </style>
 
 <script>
-import CardTitlePage from "./CardTitlePage";
+import CardTitlePage from "./CardTitlePage.vue";
+import Loader from "./Loader.vue";
 
 export default {
+  components: { CardTitlePage, Loader },
+
   data() {
     return {
-      serverDomain: window.location.host.includes("localhost")
-        ? "http://localhost:3000"
-        :process.env.VUE_APP_SERVER_DOMAIN,
+      loader: false,
+      serverDomain: process.env.VUE_APP_SERVER_DOMAIN,
     };
-  },
-  components: {
-    CardTitlePage,
   },
 
   methods: {
-    bulkAddTeam() {
-      fetch(`${this.serverDomain}/teams?bulk=true`, {
-        method: "post",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => {
-          /* eslint-disable*/
-          return response.json();
-        })
-        .then((response) => {
-          /* eslint-disable*/
-          if (response.SqlError) {
-            if (response.SqlError.errno == 1062) {
-              throw new this.UserException(
-                "Usuario já existe !",
-                response.SqlError
-              );
-            } else if (response.SqlError && response.SqlError.errno == 1162) {
-              throw new this.UserException(
-                "Senhas não conferem !",
-                response.SqlError
-              );
-            }
-          }
-        })
-        .catch((err) => {
-          /* eslint-disable*/
-          this.dialog = true;
-          this.dialogMessage.title = "Erro";
-          this.dialogMessage.message = err.message;
+    async bulkAddTeam() {
+      try {
+        this.loader = true;
+        const response = await fetch(`${this.serverDomain}/teams?bulk=true`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
         });
-      this.name = "";
-      this.userName = "";
-      this.password = "";
-      this.repeatPassword = "";
-      this.permission = "";
-      this.$refs.observer.reset();
+
+        const result = await response.json();
+
+        if (result.SqlError) {
+          if (result.SqlError.errno === 1062) {
+            throw new Error("Alguns times já estão cadastrados.");
+          } else if (result.SqlError.errno === 1162) {
+            throw new Error("Erro de validação de dados.");
+          }
+        }
+
+        alert("Times adicionados com sucesso!");
+      } catch (err) {
+        alert("Erro ao adicionar times: " + err.message);
+      } finally {
+        this.loader = false;
+      }
     },
   },
 };

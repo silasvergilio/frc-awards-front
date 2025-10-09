@@ -1,161 +1,141 @@
 <template>
   <v-form ref="form">
     <v-container fluid>
-      <CardTitlePage titulo="Adicionar Foto" icon="mdi-file-tree" body="Indicar um time a um prêmio. Lembre-se de seguir as instruções do Juiz-Chefe quanto 
-        a quantidade, critérios e metodologia">
-      </CardTitlePage>
+      <CardTitlePage
+        titulo="Adicionar Foto"
+        icon="mdi-camera"
+        body="Anexe uma imagem para o time selecionado."
+        class="card-title"
+      />
 
-      <Loader v-bind:overlay="loader"> </Loader>
+      <Loader :overlay="loader" />
 
       <v-row>
-        <v-col cols="12" md="12">
-          <v-combobox v-model="team" :items="times" label="Selecione o time"></v-combobox>
+        <v-col cols="12" md="6">
+          <v-combobox
+            v-model="team"
+            :items="times"
+            item-title="text"
+            item-value="value"
+            label="Selecione o time"
+            density="comfortable"
+            outlined
+          />
+        </v-col>
+
+        <v-col cols="12" md="6">
+          <v-file-input
+            @change="onFileChange"
+            prepend-icon="mdi-image-plus"
+            accept="image/*"
+            label="Anexar imagem"
+            density="comfortable"
+            outlined
+          />
         </v-col>
       </v-row>
 
-      <v-row>
-        <v-col cols="12" md="12">
-          <v-container fluid>
-            <v-file-input @change="onFileChange" prepend-icon="mdi-camera" accept="image/*"
-              label="Anexar imagem"></v-file-input>
-          </v-container>
-        </v-col>
-      </v-row>
-
-      <v-row>
-        <v-col cols="12" md="4">
-          <v-btn @click="addPhoto()" color="#1E5AA8" depressed elevation="5" outlined :disabled="!invalid">
-            Enviar
-          </v-btn>
-        </v-col>
+      <v-row justify="center" class="mt-4">
+        <v-btn
+          @click="addPhoto"
+          color="#1E5AA8"
+          variant="outlined"
+          elevation="4"
+          :disabled="!invalid"
+        >
+          Enviar
+        </v-btn>
       </v-row>
     </v-container>
   </v-form>
 </template>
 
 <script>
-import CardTitlePage from "./CardTitlePage";
+import CardTitlePage from "./CardTitlePage.vue";
 import Loader from "./Loader.vue";
 import axios from "axios";
 
 export default {
-  methods: {
-    AwardException(message, serverError) {
-      this.message = message;
-      this.name = "AwardException";
-      this.sqlError = serverError;
-    },
-    onFileChange(e) {
-      /* eslint-disable*/
-      this.myFileObject = e;
-    },
-    addPhoto: function () {
-      /* eslint-disable*/
-      const formData = new FormData();
-      formData.append("file", this.myFileObject);
-      console.log(this.myFileObject);
-      this.loader = true;
-      var requisicao = {
-        value: this.team.value,
-      };
-      formData.append("bodyReq", JSON.stringify(requisicao));
+  components: { CardTitlePage, Loader },
 
-      // window.alert(JSON.stringify(requisicao));
-      var url = `${this.serverDomain}/teams/picture`;
-
-      axios
-        .post(url, formData)
-        .then((res) => {
-          /* eslint-disable*/
-          this.loader = false;
-          return response.json();
-        })
-        .then((response) => {
-          /* eslint-disable*/
-          if (response.SqlError) {
-            if (response.SqlError.errno == 1010) {
-              throw new this.AwardException(
-                "Equipe Já indicada",
-                response.SqlError
-              );
-            }
-          }
-        })
-        .catch(() => {
-          /* eslint-disable*/
-          //this.dialog = true;
-          // this.dialogMessage.title = "Erro";
-          // this.dialogMessage.message = err.message;
-        });
-
-      this.$refs.form.reset();
-    },
-  },
   data() {
     return {
       times: [],
-      timesNome: [],
       loader: false,
-      serverDomain: window.location.host.includes("localhost")
-        ? "http://localhost:3000"
-        :process.env.VUE_APP_SERVER_DOMAIN,
-      premios: [
-        { text: "Autonomous", value: 1 },
-        { text: "Creativity", value: 2 },
-        { text: "Excellence in Engineering", value: 3 },
-        { text: "Industrial Design", value: 4 },
-        { text: "Innovation in Control", value: 5 },
-        { text: "Quality", value: 6 },
-        { text: "Engineering Inspiration", value: 7 },
-        { text: "Gracious Professionalism", value: 8 },
-        { text: "Imagery", value: 9 },
-        { text: "Rookie All-Star", value: 10 },
-        { text: "Rookie Inspiration", value: 11 },
-        { text: "Team Spirit", value: 12 },
-        { text: "Team Sustainability", value: 13 },
-      ],
-      salas: [
-        { text: "Lubia / William" },
-        { text: "Danielly / Flaudilenio" },
-      ],
-
-      message: "",
-      team: "",
-      award: "",
-      room: "",
-      selectedImage: "",
-      myFileObject: "",
+      team: null,
+      myFileObject: null,
+      serverDomain: process.env.VUE_APP_SERVER_DOMAIN,
     };
   },
 
-  check() {
-    if (!this.team || !this.award) alert("Complete a indicação");
-  },
-
-  components: {
-    CardTitlePage,
-    Loader,
-  },
   computed: {
     invalid() {
-      return this.team;
+      return this.team && this.myFileObject;
     },
   },
+
+  methods: {
+    onFileChange(e) {
+      this.myFileObject = e;
+    },
+
+    async addPhoto() {
+      if (!this.team || !this.myFileObject) return;
+
+      this.loader = true;
+      try {
+        const formData = new FormData();
+        formData.append("file", this.myFileObject);
+        formData.append(
+          "bodyReq",
+          JSON.stringify({ value: this.team.value })
+        );
+
+        await axios.post(`${this.serverDomain}/teams/picture`, formData);
+
+        this.$refs.form.reset();
+        this.team = null;
+        this.myFileObject = null;
+
+        this.$emit("notify", { type: "success", message: "Imagem enviada com sucesso!" });
+      } catch (error) {
+        console.error(error);
+        this.$emit("notify", { type: "error", message: "Erro ao enviar imagem." });
+      } finally {
+        this.loader = false;
+      }
+    },
+  },
+
   created() {
     this.loader = true;
-    fetch(`${this.serverDomain}/teams`, {
-      credentials: "include",
-    })
-      .then((response) => response.json())
+    fetch(`${this.serverDomain}/teams`, { credentials: "include" })
+      .then((res) => res.json())
       .then((json) => {
-        this.loader = false;
-
-        this.times = json;
-
-        this.times.forEach((element) => {
-          element.text = `${element.text}-${element.value}`
-        })
-      });
+        this.times = json.map((t) => ({
+          text: `${t.value} - ${t.text}`,
+          value: t.value,
+        }));
+      })
+      .finally(() => (this.loader = false));
   },
 };
 </script>
+
+<style scoped>
+.card-title {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.v-btn {
+  font-family: "Roboto", sans-serif;
+  text-transform: none;
+  font-weight: 500;
+}
+
+.v-combobox,
+.v-file-input {
+  font-family: "Roboto", sans-serif;
+}
+</style>

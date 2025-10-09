@@ -1,165 +1,108 @@
 <template>
-  <v-app id="inspire">
+  <v-app>
+    <!-- Navigation Drawer -->
     <v-navigation-drawer v-model="drawer" app>
-      <v-list dense>
+      <v-list>
         <v-list-item
-          v-for="menuItem in this.allowedMenuItems"
-          v-bind:key="menuItem.id"
+          v-for="menuItem in allowedMenuItems"
+          :key="menuItem.id"
           :to="menuItem.route"
         >
-          <v-list-item-action>
-            <v-icon>{{ menuItem.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ menuItem.name }}</v-list-item-title>
-          </v-list-item-content>
+        <template v-slot:prepend>
+          <v-icon :icon="menuItem.icon"></v-icon>
+        </template>
+          <v-list-item-title>{{ menuItem.name }}</v-list-item-title>
         </v-list-item>
 
-        <v-list-item v-if="this.$store.state.user" @click="logout()">
-          <v-list-item-action>
-            <v-icon>mdi-logout</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Logout</v-list-item-title>
-          </v-list-item-content>
+        <v-list-item v-if="user" @click="logout">
+          <template v-slot:prepend>
+          <v-icon icon= 'mdi-logout'></v-icon>
+        </template>
+          <v-list-item-title>Logout</v-list-item-title>
         </v-list-item>
 
-        <div
-          style="
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            padding-top: 10rem;
-          "
-        >
-          <v-img style="max-width: 50%" :src="require('./assets/logo.png.webp')" />
+        <div class="drawer-logo">
+          <v-img max-width="100" :src="require('./assets/logo.png.webp')" />
         </div>
       </v-list>
     </v-navigation-drawer>
 
+    <!-- App Bar -->
     <v-app-bar app color="#0083AE" dark>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title>FRC - Reefscape</v-toolbar-title>
-
+      <v-toolbar-title><v-img
+      src="@/assets/logo_text.png"
+      alt="FRC-Reefscape"
+      max-height="40"
+      max-width="300"
+      contain
+    ></v-img></v-toolbar-title>
       <v-spacer></v-spacer>
-      <p v-if="this.$store.state.user" class="font-weight-bold">
-        {{ this.$store.state.user.fullName }}
-      </p>
+      <div v-if="user" class="font-weight-bold">{{ user.fullName }}</div>
     </v-app-bar>
 
-    <v-content>
+    <!-- Main Content -->
+    <v-main>
       <router-view></router-view>
-    </v-content>
-    <v-footer color="#ABD8E7" app>
+      <Loader :overlay="loader" />
+    </v-main>
+
+    <!-- Footer -->
+    <v-footer app color="#ABD8E7">
       <span class="white--text">&copy; 2025 - Silver Tech</span>
     </v-footer>
   </v-app>
 </template>
 
-<style scoped>
-.user-title {
-  margin-left: 50rem;
-}
-</style>
 <script>
+import { ref, computed } from "vue";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
+
 export default {
-  props: {
-    source: String,
-  },
+  setup() {
+    const drawer = ref(false);
+    const store = useStore();
+    const router = useRouter();
+    const loader = ref(true);
 
-  methods: {
-    logout() {
-      this.$router.push("/login");
-      this.$store.commit("updateUser", null);
-    },
-  },
 
-  data: () => ({
-    user: null,
-    drawer: null,
-    menuItens: [
-      {
-        name: "Login",
-        icon: "mdi-login",
-        route: "/login",
-        permission: [""],
-      },
-      {
-        name: "Adicionar Usuário",
-        icon: "mdi-account-multiple-plus",
-        route: "/adduser",
-        permission: ["Administrador"],
-      },
-      {
-        name: "Adicionar Time",
-        icon: "mdi-shield-plus-outline",
-        route: "/addTeam",
-        permission: ["Administrador"],
-      },
-      {
-        name: "Adicionar Times",
-        icon: "mdi-folder-check",
-        route: "/addTeams",
-        permission: ["Administrador", "Juiz de Sala"],
-      },
-      {
-        name: "Adicionar Foto",
-        icon: "mdi-camera",
-        route: "/adicionar-foto",
-        permission: ["Administrador", "Juiz de Sala"],
-      },
-      {
-        name: "Lista de Times",
-        icon: "mdi-account-badge-horizontal-outline",
-        route: "/listTeams",
-        permission: ["Administrador", "Juiz de Sala"],
-      },
+    const user = computed(() => store.state.user);
 
-      {
-        name: "Indicar Times",
-        icon: "mdi-file-tree",
-        route: "/nominateTeam",
-        permission: ["Administrador", "Juiz de Sala"],
-      },
-      {
-        name: "Times não indicados",
-        icon: "mdi-clipboard",
-        route: "/non-nominated",
-        permission: ["Administrador", "Juiz de Sala"],
-      },
-      {
-        name: "Visitas",
-        icon: "mdi-door-open",
-        route: "/visits",
-        permission: ["Administrador", "Juiz de Sala"],
-      },
-      {
-        name: "Indicações",
-        icon: "mdi-trophy-award",
-        route: "/awards",
-        permission: ["Administrador", "Juiz de Sala"],
-      },
-    ],
-  }),
+    const menuItems = [
+      { name: "Login", icon: "mdi-login", route: "/login", permission: [""] },
+      { name: "Adicionar Usuário", icon: "mdi-account-multiple-plus", route: "/adduser", permission: ["Administrador"] },
+      { name: "Adicionar Time", icon: "mdi-shield-plus-outline", route: "/addTeam", permission: ["Administrador"] },
+      { name: "Adicionar Times", icon: "mdi-folder-check", route: "/addTeams", permission: ["Administrador","Juiz de Sala"] },
+      { name: "Adicionar Foto", icon: "mdi-camera", route: "/adicionar-foto", permission: ["Administrador","Juiz de Sala"] },
+      { name: "Lista de Times", icon: "mdi-list-box-outline", route: "/listTeams", permission: ["Administrador","Juiz de Sala"] },
+      { name: "Indicar Times", icon: "mdi-file-tree", route: "/nominateTeam", permission: ["Administrador","Juiz de Sala"] },
+      { name: "Times não indicados", icon: "mdi-clipboard", route: "/non-nominated", permission: ["Administrador","Juiz de Sala"] },
+      { name: "Visitas", icon: "mdi-door-open", route: "/visits", permission: ["Administrador","Juiz de Sala"] },
+      { name: "Indicações", icon: "mdi-trophy-award", route: "/awards", permission: ["Administrador","Juiz de Sala"] },
+    ];
 
-  components: {},
-  computed: {
-    allowedMenuItems() {
-      var allowedMenuItems = [];
-      if (!this.$store.state.user) {
-        if (this.menuItens.indexOf(this.menuItens[0] === -1))
-          allowedMenuItems.push(this.menuItens[0]);
-          allowedMenuItems.push(this.menuItens[1]);
+    const allowedMenuItems = computed(() => {
+      if (!user.value) {
+        return menuItems.filter(item => item.name === "Login" || item.name === "Adicionar Usuário");
       }
-      this.menuItens.forEach((menuItem) => {
-        if (this.$store.state.user) {
-          if (menuItem.permission.includes(this.$store.state.user.permission)) {
-            allowedMenuItems.push(menuItem);
-          }
-        }
-      });
-      return allowedMenuItems;
-    },
+      return menuItems.filter(item => item.permission.includes(user.value.permission));
+    });
+
+    const logout = () => {
+      store.commit("updateUser", null);
+      router.push("/login");
+    };
+
+    return { drawer, allowedMenuItems, logout, user, loader };
   },
 };
 </script>
+
+<style scoped>
+.drawer-logo {
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+}
+</style>

@@ -1,157 +1,108 @@
-import Vue from "vue";
-import App from "./App.vue";
-import vuetify from "./plugins/vuetify";
-import VueRouter from "vue-router";
-import "@mdi/font/css/materialdesignicons.css"; // Ensure you are using css-loader
+// main.js (Vue 3)
+import { createApp } from 'vue'
+import App from './App.vue'
 
-import Awards from "./components/Awards";
-import AddTeam from "./components/AddTeam";
-import nominateTeam from "./components/NominateTeam";
-import listTeams from "./components/ListTeams";
-import Home from "./components/Home";
-import Callback from "./components/CallBack";
-import AddUser from "./components/AddUser";
-import Login from "./components/Login";
-import BulkAddTeam from "./components/BulkAddTeam";
-import NonNominated from "./components/NonNominated";
-import Visits from './components/Visits'
-import AddPicture from './components/AddPicture'
 
-import VueMask from "v-mask";
-import Vuex from "vuex";
-import VuexPersistence from "vuex-persist";
+// Vuetify 3
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import { aliases, mdi } from 'vuetify/iconsets/mdi'
+import "./plugins/validation"; // importa a config que criamos ✅
 
-Vue.use(Vuex);
-Vue.use(VueMask);
-Vue.use(VueRouter);
-Vue.use(vuetify, {
-  iconfont: "mdi",
-});
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
 
-Vue.config.productionTip = false;
+const vuetify = createVuetify({
+  components,
+  directives,
+  icons: {
+    defaultSet: 'mdi',
+    aliases,
+    sets: { mdi },
+  },
+})
 
+
+// Estilos de ícones
+import '@mdi/font/css/materialdesignicons.css'
+
+// Vue Router 4
+import { createRouter, createWebHistory } from 'vue-router'
+
+// Vuex 4
+import { createStore } from 'vuex'
+import VuexPersistence from 'vuex-persist'
+
+// Plugins adicionais
+import VueTheMask from "vue-the-mask";
+
+// Componentes
+import Awards from './components/Awards.vue'
+import AddTeam from './components/AddTeam.vue'
+import NominateTeam from './components/NominateTeam.vue'
+import ListTeams from './components/ListTeams.vue'
+import Home from './components/Home.vue'
+import Callback from './components/CallBack.vue'
+import AddUser from './components/AddUser.vue'
+import Login from './components/Login.vue'
+import BulkAddTeam from './components/BulkAddTeam.vue'
+import NonNominated from './components/NonNominated.vue'
+import Visits from './components/Visits.vue'
+import AddPicture from './components/AddPicture.vue'
+
+// ---------- Vuex ----------
 const vuexLocal = new VuexPersistence({
   storage: window.localStorage,
-});
+})
 
-const store = new Vuex.Store({
+const store = createStore({
   state: {
     user: null,
   },
-
   mutations: {
     updateUser(state, newUserState) {
-      state.user = newUserState;
+      state.user = newUserState
     },
   },
   plugins: [vuexLocal.plugin],
-});
+})
 
-const router = new VueRouter({
-  base: __dirname,
-  routes: [
-    {
-      name: "Login",
-      path: "/login",
-      component: Login,
-    },
-    {
-      path: "/home",
-      component: Home,
-    },
-    {
-      path: '/visits',
-      component: Visits,
-      beforeEnter: (to, from, next) => {
-        if (!store.state.user) next("/login");
-        else next();
-      },
-    },
-    {
-      path: "/non-nominated",
-      component: NonNominated,
-      beforeEnter: (to, from, next) => {
-        if (!store.state.user) next("/login");
-        else next();
-      },
-    },
-    {
-      path: "/addTeams",
-      component: BulkAddTeam,
-      beforeEnter: (to, from, next) => {
-        if (!store.state.user) next("/login");
-        else next();
-      },
-    },
-    {
-      path: "/awards",
-      component: Awards,
-      beforeEnter: (to, from, next) => {
-        if (!store.state.user) next("/login");
-        else next();
-      },
-    },
-    {
-      path: "/addTeam",
-      component: AddTeam,
-      beforeEnter: (to, from, next) => {
-        if (!store.state.user) next("/login");
-        else next();
-      },
-    },
-    {
-      path: "/nominateteam",
-      component: nominateTeam,
-      beforeEnter: (to, from, next) => {
-        if (!store.state.user) next("/login");
-        else next();
-      },
-    },
-    {
-      path: "/listTeams",
-      component: listTeams,
-      beforeEnter: (to, from, next) => {
-        if (!store.state.user) next("/login");
-        else next();
-      },
-    },
-    {
-      path: "/adicionar-foto",
-      component: AddPicture,
-      beforeEnter: (to, from, next) => {
-        if (!store.state.user) next("/login");
-        else next();
-      },
-    },
-    {
-      path: "/callback",
-      component: Callback,
-      beforeEnter: (to, from, next) => {
-        if (!store.state.user) next("/login");
-        else next();
-      },
-    },
-    {
-      path: "/adduser",
-      component: AddUser,
-    },
-    {
-      path: "*",
-      redirect: "/login",
-    },
-  ],
-});
+// ---------- Router ----------
+const routes = [
+  { path: '/login', name: 'Login', component: Login },
+  { path: '/home', component: Home },
+  { path: '/visits', component: Visits },
+  { path: '/non-nominated', component: NonNominated },
+  { path: '/addTeams', component: BulkAddTeam },
+  { path: '/awards', component: Awards },
+  { path: '/addTeam', component: AddTeam },
+  { path: '/nominateteam', component: NominateTeam },
+  { path: '/listTeams', component: ListTeams },
+  { path: '/adicionar-foto', component: AddPicture },
+  { path: '/callback', component: Callback },
+  { path: '/adduser', component: AddUser },
+  { path: '/:pathMatch(.*)*', redirect: '/login' },
+]
 
-// /* eslint-disable*/
-// router.beforeEach((to, from, next) => {
-//   if (from.name !== '/login' && !store.state.user) next('/login')
-//   else next('/');
-// })
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})
 
-new Vue({
-  vuetify,
-  router,
-  store,
+// Middleware de rota (login obrigatório)
+router.beforeEach((to, from, next) => {
+  const requiresAuth = !['Login', 'AddUser'].includes(to.name)
+  if (requiresAuth && !store.state.user) next('/login')
+  else next()
+})
 
-  render: (h) => h(App),
-}).$mount("#app");
+
+// ---------- App ----------
+const app = createApp(App)
+
+app.use(VueTheMask);
+app.use(router)
+app.use(store)
+app.use(vuetify)
+
+app.mount('#app')

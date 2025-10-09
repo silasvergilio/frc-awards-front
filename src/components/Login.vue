@@ -1,173 +1,123 @@
 <template>
-  <validation-observer ref="observer" v-slot="{ invalid }">
-    <v-form ref="form">
-      <Loader v-bind:overlay="loader"> </Loader>
-
-      <v-dialog v-model="dialog" max-width="290">
+  <v-container>
+    <v-row justify="center">
+      <v-col cols="12" md="6">
         <v-card>
-          <v-card-title class="headline">
-            {{ dialogMessage.title }}
-          </v-card-title>
-
-          <!-- <v-img :src="require('../assets/warning.png')" /> -->
+          <v-card-title class="headline">Login</v-card-title>
 
           <v-card-text>
-            {{ dialogMessage.message }}
+            <Form :validation-schema="schema" @submit="login">
+              <v-row>
+                <!-- Usuário -->
+                <v-col cols="12">
+                  <Field
+                    name="userName"
+                    as="v-text-field"
+                    label="Nome do Usuário"
+                    prepend-icon="mdi-card-text-outline"
+                    v-model="userName"
+                  />
+                  <ErrorMessage name="userName">
+                    <template #default="{ message }">
+                      <v-alert type="error" dense text>{{ message }}</v-alert>
+                    </template>
+                  </ErrorMessage>
+                </v-col>
+
+                <!-- Senha -->
+                <v-col cols="12">
+                  <Field
+                    name="password"
+                    as="v-text-field"
+                    label="Senha"
+                    prepend-icon="mdi-lock-question"
+                    type="password"
+                    v-model="password"
+                  />
+                  <ErrorMessage name="password">
+                    <template #default="{ message }">
+                      <v-alert type="error" dense text>{{ message }}</v-alert>
+                    </template>
+                  </ErrorMessage>
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col cols="12">
+                  <v-btn color="#68C3E2" type="submit" class="ma-2" block>
+                    Login
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </Form>
           </v-card-text>
         </v-card>
-      </v-dialog>
-      <!--Dialog de Confirmação -->
-
-      <v-container>
-        <CardTitlePage titulo="Login" icon="mdi-login" body=""> </CardTitlePage>
-
-        <v-row>
-          <v-container class="container-inputs">
-            <v-col>
-              <validation-provider
-                v-slot="{ errors }"
-                name="Nome de Usuário"
-                rules="required"
-              >
-                <v-text-field
-                  prepend-icon="mdi-card-text-outline"
-                  label="Nome do Usuário"
-                  :error-messages="errors"
-                  v-model="userName"
-                ></v-text-field>
-              </validation-provider>
-            </v-col>
-
-            <v-col>
-              <validation-provider
-                v-slot="{ errors }"
-                name="Senha"
-                rules="required"
-              >
-                <v-text-field
-                  :error-messages="errors"
-                  label="Senha"
-                  prepend-icon="mdi-lock-question"
-                  v-model="password"
-                  type="password"
-                ></v-text-field>
-              </validation-provider>
-            </v-col>
-          </v-container>
-        </v-row>
-        <v-row>
-          <v-container class="container-inputs">
-            <v-col cols="12" md="12">
-              <v-btn
-                :disabled="invalid"
-                color="#68C3E2"
-                depressed
-                elevation="5"
-                outlined
-                v-on:click="login(userName, password)"
-              >
-                Login
-              </v-btn>
-            </v-col>
-          </v-container>
-        </v-row>
-      </v-container>
-    </v-form>
-  </validation-observer>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
-<style scoped>
-/* .container-inputs {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-} */
-</style>
-
 <script>
-import CardTitlePage from "./CardTitlePage";
-import Loader from "./Loader.vue";
-import { required } from "vee-validate/dist/rules";
-import { ValidationObserver, ValidationProvider, extend } from "vee-validate";
-
-extend("required", {
-  ...required,
-  message: "{_field_} não pode ser vazio",
-});
+import { Form, Field, ErrorMessage } from "vee-validate";
+import * as yup from "yup";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 
 export default {
+  components: { Form, Field, ErrorMessage },
   data() {
     return {
-      loader: false,
-      valid: false,
-      dialog: false,
-      dialogMessage: {
-        title: "",
-        message: "",
-      },
-      password: "",
       userName: "",
-      serverDomain: window.location.host.includes('localhost') ? "http://localhost:3000" : process.env.VUE_APP_SERVER_DOMAIN,
+      password: "",
+      // Ajuste seu domínio conforme antes
+      serverDomain: window.location.host.includes("localhost")
+        ? process.env.VUE_APP_SERVER_DOMAIN
+        : process.env.VUE_APP_SERVER_DOMAIN,
+      schema: yup.object({
+        userName: yup.string().required("Nome do Usuário não pode ser vazio"),
+        password: yup.string().required("Senha não pode ser vazia"),
+      }),
     };
   },
-  components: {
-    CardTitlePage,
-    ValidationObserver,
-    ValidationProvider,
-    Loader,
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    return { store, router };
   },
-
-  created() {
-      /* eslint-disable*/
-      console.log(this.serverDomain);
-    },
-
   methods: {
-    
-
-    UserException(message, serverError) {
-      this.message = message;
-      this.name = "UserException";
-      this.sqlError = serverError;
-    },
-
-    login: function(userName, password) {
-      var requisicao = {
-        userName: userName,
-        password: password,
-      };
-      this.loader = true;
-      /* eslint-disable*/
-      fetch(`${this.serverDomain}/users/login`, {
-        credentials: "include",
-        method: "post",
-        body: JSON.stringify(requisicao),
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "Access-Control-Allow-Origin":
-            "https://ftc-awards-server-mysql.herokuapp.com",
-        },
-      })
-        .then((response) => {
-          this.loader = false;
-          return response.json();
-        })
-        .then((res) => {
-          this.loader = false;
-          if (res.status == "success") {
-            /* eslint-disable*/
-            this.$store.commit("updateUser", res.user);
-            this.$router.push("/listTeams");
-          }
-        })
-        .catch((err) => {
-          /* eslint-disable*/
+    async login() {
+      try {
+        const response = await fetch(`${this.serverDomain}/users/login`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userName: this.userName,
+            password: this.password,
+          }),
         });
-      this.userName = "";
-      this.password = "";
-      this.$refs.observer.reset();
+
+        const data = await response.json();
+
+        if (data.status === "success") {
+          this.store.commit("updateUser", data.user);
+          this.router.push("/listTeams");
+        } else {
+          throw new Error(data.message || "Erro ao logar");
+        }
+      } catch (err) {
+        alert(err.message); // pode trocar por v-dialog se quiser
+      } finally {
+        this.userName = "";
+        this.password = "";
+      }
     },
   },
 };
 </script>
+
+<style scoped>
+.v-card {
+  padding: 1rem;
+}
+</style>

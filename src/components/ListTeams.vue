@@ -1,106 +1,136 @@
 <template>
   <div>
+    <!-- Dialog de Imagem -->
     <v-dialog v-model="dialog" max-width="290">
-      <v-card>
-        <v-img v-if="this.times.length > 0 && this.times[index].imageLink" :src=this.times[index].imageLink />
-      </v-card>
-
-      <v-card>
-        <v-img v-if="this.times.length > 0 && !this.times[index].imageLink" :src=srcComputed />
+      <v-card v-if="times.length > 0">
+        <v-img v-if="times[index]?.imageLink" :src="times[index].imageLink" />
+        <v-img v-else :src="srcComputed" />
       </v-card>
     </v-dialog>
-    <!--Dialog de Confirmação -->
 
-    <Loader v-bind:overlay="loader"> </Loader>
+    <!-- Loader -->
+    <Loader :overlay="loader" />
 
-    <v-simple-table>
-      <template v-slot:default>
-        <thead>
-          <tr>
-            <th class="text-left">Nome</th>
-            <th class="text-left">Número</th>
-            <th class="text-left">Estado</th>
-           
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="item in times"
-            :key="item.value"
-            v-on:click="
-              dialog = true;
-              changeIndex(item.value);
-            "
-          >
-            <td>{{ item.text }} <v-icon v-if="item.value >= 10000">mdi-star</v-icon> </td>
-            <td>{{ item.value }}</td>
-            <td>{{ item.state }}</td>
-           
-          </tr>
-        </tbody>
+    <!-- Tabela de Times com hover e zebra stripes -->
+    <!-- <v-simple-table class="team-table">
+      <thead>
+        <tr>
+          <th class="text-left">Nome</th>
+          <th class="text-left">Número</th>
+          <th class="text-left">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="(item, i) in times"
+          :key="item.value"
+          class="team-row"
+          :class="{ 'even-row': i % 2 === 1 }"
+          @click="openDialog(item)"
+        >
+          <td>{{ item.text }} <v-icon v-if="item.value >= 10000">mdi-star</v-icon></td>
+          <td>{{ item.value }}</td>
+          <td>{{ item.state }}</td>
+        </tr>
+      </tbody>
+    </v-simple-table> -->
+
+    <v-data-table :headers="headers" :items="times" hover striped hide-default-footer :items-per-page="times.length">
+      <template #item="{ item }">
+        <tr @click="openDialog(item)" style="cursor: pointer;">
+          <td>{{ item.state }}</td>
+          <td>{{ item.text }}</td>
+          <td>{{ item.value }}</td>
+          <td>{{ item.school }}</td>
+        </tr>
       </template>
-    </v-simple-table>
+
+    </v-data-table>
+
   </div>
 </template>
 
 <script>
+import { ref, computed, onMounted } from "vue";
 import Loader from "./Loader.vue";
 
 export default {
-  data() {
-    return {
-      times: [],
-      index: 0,
-      dialog: false,
-      loader: false,
-      serverDomain: window.location.host.includes("localhost")
-        ? "http://localhost:3000"
-        : process.env.VUE_APP_SERVER_DOMAIN,
-    };
-  },
-  computed: {
-    srcComputed() {
-      /* eslint-disable*/
-      let index = this.index;
+  components: { Loader },
+  setup() {
+    const dialog = ref(false);
+    const times = ref([]);
+    const index = ref(0);
+    const loader = ref(false);
+
+    const headers = [
+      { title: 'Estado', value: 'state' },
+      { title: 'Nome', value: 'text' },
+      { title: '# Time', value: 'value' },
+      { title: 'Escola', value: 'school' },
+    ];
+
+    const serverDomain = process.env.VUE_APP_SERVER_DOMAIN;
+
+    const srcComputed = computed(() => {
+      if (!times.value[index.value]) return null;
       try {
-        return require("../assets/fotos_times/" +
-          this.times[index].value +
-          ".jpg");
+        return require(`../assets/fotos_times/${times.value[index.value].value}.jpg`);
       } catch {
         return require("../assets/fotos_times/standard.webp");
       }
-    },
-  },
-  components: {
-    Loader,
-  },
-  methods: {
-    imageError: function() {
-      /* eslint-disable*/
-    },
-    changeIndex: function(newTeam) {
-     // this.$store.commit("increment");
+    });
 
-      for (let k = 0; k < this.times.length; k++) {
-        if (newTeam == this.times[k].value) this.index = k;
+    const openDialog = (item) => {
+      const i = times.value.findIndex((t) => t.value === item.value);
+      index.value = i;
+      dialog.value = true;
+    };
+
+    const fetchTeams = async () => {
+      loader.value = true;
+      try {
+        const res = await fetch(`${serverDomain}/teams?image=true`, {
+          credentials: "include",
+        });
+        const json = await res.json();
+        times.value = json.sort((a, b) => Number(a.value) - Number(b.value));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        loader.value = false;
       }
-    },
-  },
+    };
 
-  created() {
-    this.loader = true;
-    fetch(`${this.serverDomain}/teams?image=true`, {
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((json) => {
+    onMounted(fetchTeams);
 
-        this.loader = false;
-        this.times = json;
-        this.times.sort((a, b) => Number(a.value) - Number(b.value));
-        console.log("LISTA TIMES SORT", this.times)
-      })
-      .catch(() => {});
+    return { dialog, times, index, loader, srcComputed, openDialog, headers };
   },
 };
 </script>
+
+<style scoped>
+
+/* Para todas as linhas da tabela */
+.v-data-table tbody tr:hover {
+  background-color: #e0f7fa !important; /* substitua pela cor desejada */
+  cursor: pointer;
+}
+
+.team-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.team-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.team-row:hover {
+  background-color: #e0f7fa;
+}
+
+.even-row {
+  background-color: #f5f5f5;
+}
+</style>

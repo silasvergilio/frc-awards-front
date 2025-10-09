@@ -1,104 +1,67 @@
 <template>
   <div>
-    <v-dialog v-model="dialog" max-width="290">
-      <v-card>
-        <v-img v-if="this.times.length > 0" :src="srcComputed" />
+    <!-- Diálogo de Imagem -->
+    <v-dialog v-model="dialog" max-width="320">
+      <v-card v-if="times.length > 0">
+        <v-img :src="srcComputed" />
       </v-card>
     </v-dialog>
-    <!--Dialog de Confirmação -->
 
-    <Loader v-bind:overlay="loader"> </Loader>
+    <!-- Loader -->
+    <Loader :overlay="loader" />
 
-    <CardTitlePage
-    class="card-title"
-      titulo="Times não nomeados"
-      icon="mdi-clipboard"
-      body="Estes são times que não foram nomeados a nenhum prêmio, mas recomenda-se que sejam visitados."
-    >
-    </CardTitlePage>
+    <!-- Título -->
+    <v-container fluid>
+      <v-card elevation="2" class="pa-4">
+        <v-card-title class="text-h6 font-weight-bold">
+          Times não indicados </v-card-title>
 
-    <v-simple-table>
-      <template v-slot:default>
-        <thead>
-          <tr>
-            <th class="text-left">Nome</th>
-            <th class="text-left">Número</th>
-            <th class="text-left">Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="item in times"
-            :key="item.value"
-            v-on:click="
-              dialog = true;
-              changeIndex(item.value);
-            "
-          >
-            <td>{{ item.text }}</td>
-            <td>{{ item.value }}</td>
-            <td>{{ item.state }}</td>
-          </tr>
-        </tbody>
-      </template>
-    </v-simple-table>
+        <!-- Tabela -->
+        <v-data-table :headers="headers" hover :items="times" hide-default-footer class="team-table"
+          @click:row="openDialog" />
+      </v-card>
+    </v-container>
   </div>
 </template>
-
-<style scoped>
-.card-title{
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-}
-</style>
 
 <script>
 import CardTitlePage from "./CardTitlePage";
 import Loader from "./Loader.vue";
 
 export default {
+  components: { Loader, CardTitlePage },
   data() {
     return {
       times: [],
       index: 0,
       dialog: false,
       loader: false,
-      serverDomain: window.location.host.includes("localhost")
-        ? "http://localhost:3000"
-        :process.env.VUE_APP_SERVER_DOMAIN,
+      serverDomain: process.env.VUE_APP_SERVER_DOMAIN,
+
+      headers: [
+        { title: "Nome", key: "text", align: "start" },
+        { title: "Número", key: "value" },
+        { title: "Estado", key: "state" },
+      ],
     };
   },
   computed: {
     srcComputed() {
-      /* eslint-disable*/
-      let index = this.index;
+      if (!this.times[this.index]) return require("../assets/fotos_times/standard.webp");
       try {
-        return require("../assets/fotos_times/" +
-          this.times[index].value +
-          ".jpg");
+        return require(`../assets/fotos_times/${this.times[this.index].value}.jpg`);
       } catch {
         return require("../assets/fotos_times/standard.webp");
       }
     },
   },
-  components: {
-    Loader,
-    CardTitlePage,
-  },
   methods: {
-    imageError: function() {
-      /* eslint-disable*/
-      console.log("image not working");
-    },
-    changeIndex: function(newTeam) {
-      this.$store.commit("increment");
-
-      for (let k = 0; k < this.times.length; k++) {
-        if (newTeam == this.times[k].value) this.index = k;
-      }
+    openDialog(item) {
+      const i = this.times.findIndex((t) => t.value === item.value);
+      this.index = i;
+      this.dialog = true;
     },
   },
-
   created() {
     this.loader = true;
     fetch(`${this.serverDomain}/awards/non-nominated/teams`, {
@@ -106,10 +69,29 @@ export default {
     })
       .then((response) => response.json())
       .then((json) => {
-        this.loader = false;
-        this.times = json;
+        this.times = json.sort((a, b) => Number(a.value) - Number(b.value));
       })
-      .catch(() => {});
+      .catch((err) => console.error(err))
+      .finally(() => (this.loader = false));
   },
 };
 </script>
+
+<style scoped>
+.card-title {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Estética da tabela */
+.team-table {
+  font-family: "Roboto", sans-serif;
+  --v-theme-surface-variant: transparent;
+}
+
+.v-data-table-row:hover {
+  background-color: rgba(30, 90, 168, 0.08) !important;
+  /* hover azul leve */
+  cursor: pointer;
+}
+</style>

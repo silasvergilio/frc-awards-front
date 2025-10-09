@@ -1,51 +1,76 @@
 <template>
   <div>
-    <v-dialog v-model="dialog" max-width="290">
+    <!-- Dialog de imagem -->
+    <v-dialog v-model="dialog" max-width="400">
       <v-card>
-        <v-img v-if="this.times.length > 0" :src="srcComputed" />
+        <v-img
+          v-if="times.length > 0"
+          :src="srcComputed"
+          max-height="300"
+          contain
+        />
       </v-card>
     </v-dialog>
-    <!--Dialog de Confirmação -->
 
-    <Loader v-bind:overlay="loader"> </Loader>
+    <!-- Loader -->
+    <Loader :overlay="loader" />
 
-    <v-simple-table>
-      <template v-slot:default>
-        <thead>
-          <tr>
-            <th class="text-left">Nome</th>
-            <th class="text-left">Número</th>
-            <th>Visita AE</th>
-            <th>Visita MCI</th>
-            <th>Visita Extra</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in times" :key="item.value">
-            <td>{{ item.text }}</td>
-            <td>{{ item.value }}</td>
-            <td>
-              <v-checkbox
-                v-on:click="visitChange(item,'visitedMCI')"
-                v-model="item.visitedMCI"
-              ></v-checkbox>
-            </td>
-            <td>
-              <v-checkbox
-                v-on:click="visitChange(item,'visitedTA')"
-                v-model="item.visitedTA"
-              ></v-checkbox>
-            </td>
-            <td>
-              <v-checkbox
-                v-on:click="visitChange(item,'visitedExtra')"
-                v-model="item.visitedExtra"
-              ></v-checkbox>
-            </td>
-          </tr>
-        </tbody>
-      </template>
-    </v-simple-table>
+    <!-- Tabela de times -->
+    <v-container fluid>
+      <v-card elevation="2" class="pa-4">
+        <v-card-title class="text-h6 font-weight-bold">
+Controle de visitas        </v-card-title>
+
+        <v-data-table hide-default-footer :items-per-page="times.length">
+          <thead>
+            <tr>
+              <th class="text-left">Nome</th>
+              <th class="text-left">Número</th>
+              <th class="text-center">Visita AE</th>
+              <th class="text-center">Visita MCI</th>
+              <th class="text-center">Visita Extra</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="item in times"
+              :key="item.value"
+              style="cursor: pointer"
+            >
+              <td>{{ item.text }}</td>
+              <td>{{ item.value }}</td>
+              <td class="text-center">
+                <v-checkbox
+                  hide-details
+                  density="compact"
+                  color="#1E5AA8"
+                  v-model="item.visitedTA"
+                  @change="visitChange(item, 'visitedTA')"
+                />
+              </td>
+              <td class="text-center">
+                <v-checkbox
+                  hide-details
+                  density="compact"
+                  color="#1E5AA8"
+                  v-model="item.visitedMCI"
+                  @change="visitChange(item, 'visitedMCI')"
+                />
+              </td>
+              <td class="text-center">
+                <v-checkbox
+                  hide-details
+                  density="compact"
+                  color="#1E5AA8"
+                  v-model="item.visitedExtra"
+                  @change="visitChange(item, 'visitedExtra')"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </v-data-table>
+      </v-card>
+    </v-container>
   </div>
 </template>
 
@@ -53,79 +78,78 @@
 import Loader from "./Loader.vue";
 
 export default {
+  components: { Loader },
+
   data() {
     return {
-      visited: false,
       times: [],
-      index: 0,
       dialog: false,
+      index: 0,
       loader: false,
-      serverDomain: window.location.host.includes("localhost")
-        ? "http://localhost:3000"
-        :process.env.VUE_APP_SERVER_DOMAIN,
+      serverDomain: process.env.VUE_APP_SERVER_DOMAIN,
     };
   },
+
   computed: {
     srcComputed() {
-      /* eslint-disable*/
-      let index = this.index;
       try {
-        return require("../assets/fotos_times/" +
-          this.times[index].value +
-          ".jpg");
+        return require(`../assets/fotos_times/${this.times[this.index].value}.jpg`);
       } catch {
         return require("../assets/fotos_times/standard.webp");
       }
     },
   },
-  components: {
-    Loader,
-  },
+
   methods: {
-    visitChange: function (item, visitType) {
+    openDialog(index) {
+      this.index = index;
+      this.dialog = true;
+    },
+
+    async visitChange(item, visitType) {
       this.loader = true;
-      var requisicao = {
-        visit: visitType,
-        newValue: visitType == 'visitedMCI' ? item.visitedMCI : visitType == 'visitedTA' ? item.visitedTA : item.visitedExtra,
-      };
+      try {
+        const requisicao = {
+          visit: visitType,
+          newValue: item[visitType],
+        };
 
-      fetch(`${this.serverDomain}/teams/${item.value}`, {
-        method: "PUT",
-        body: JSON.stringify(requisicao),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then(() => {
-       this.loader = false;
-      }).catch( (err) =>{
+        await fetch(`${this.serverDomain}/teams/${item.value}`, {
+          method: "PUT",
+          body: JSON.stringify(requisicao),
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err) {
+        console.error("Erro ao atualizar visita:", err);
+      } finally {
         this.loader = false;
-      } );
-    },
-
-    imageError: function () {
-      /* eslint-disable*/
-      console.log("image not working");
-    },
-    changeIndex: function (newTeam) {
-      this.$store.commit("increment");
-
-      for (let k = 0; k < this.times.length; k++) {
-        if (newTeam == this.times[k].value) this.index = k;
       }
     },
   },
 
   created() {
     this.loader = true;
-    fetch(`${this.serverDomain}/teams`, {
-      credentials: "include",
-    })
-      .then((response) => response.json())
+    fetch(`${this.serverDomain}/teams`, { credentials: "include" })
+      .then((r) => r.json())
       .then((json) => {
-        this.loader = false;
-        this.times = json;
+        this.times = json.map((t) => ({
+          ...t,
+          visitedMCI: t.visitedMCI == 0 ? false : true,
+          visitedTA: t.visitedTA == 0 ? false : true,
+          visitedExtra: t.visitedExtra == 0 ? false : true,
+
+        }));
       })
-      .catch(() => {});
+      .finally(() => {
+        this.loader = false;
+      });
   },
 };
 </script>
+
+<style scoped>
+tr:hover {
+  background-color: #e3f2fd;
+  transition: 0.2s;
+}
+</style>

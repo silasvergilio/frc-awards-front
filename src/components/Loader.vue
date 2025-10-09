@@ -1,19 +1,28 @@
 <template>
-  <div class="text-center">
-
-    <v-overlay :value="overlay">
-      <v-progress-circular 
+  <v-overlay :value="overlay" absolute>
+    <v-progress-circular
       color="#1E5AA8"
-      indeterminate size="128"></v-progress-circular>
-    </v-overlay>
-  </div>
+      indeterminate
+      size="128"
+    ></v-progress-circular>
+  </v-overlay>
 </template>
 
 <script>
 export default {
-    props: {
-    overlay: Boolean,
-  
+  props: {
+    overlay: {
+      type: Boolean,
+      default: false,
+    },
   },
 };
 </script>
+
+<style scoped>
+.v-overlay__content {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+}
+</style>
