@@ -8,10 +8,38 @@
     </v-dialog>
 
     <!-- Loader -->
-    <Loader :overlay="loader" />
+  <!-- Loader -->
+  <v-skeleton-loader
+  v-if="loader"
+  class="mx-auto mt-4"
+  type="table"
+  elevation="1"
+  :loading="loader"
+>
+  <template #default>
+    <v-card flat>
+      <v-table>
+        <thead>
+          <tr>
+            <th class="text-left">Nome</th>
+            <th class="text-left">Número</th>
+            <th class="text-left">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="n in 8" :key="n">
+            <td><v-skeleton-loader type="text" width="70%"></v-skeleton-loader></td>
+            <td><v-skeleton-loader type="text" width="40%"></v-skeleton-loader></td>
+            <td><v-skeleton-loader type="text" width="50%"></v-skeleton-loader></td>
+          </tr>
+        </tbody>
+      </v-table>
+    </v-card>
+  </template>
+</v-skeleton-loader>
 
     <!-- Título -->
-    <v-container fluid>
+    <v-container v-else fluid>
       <v-card elevation="2" class="pa-4">
         <v-card-title class="text-h6 font-weight-bold">
           Times não indicados </v-card-title>
@@ -26,10 +54,9 @@
 
 <script>
 import CardTitlePage from "./CardTitlePage";
-import Loader from "./Loader.vue";
 
 export default {
-  components: { Loader, CardTitlePage },
+  components: {CardTitlePage },
   data() {
     return {
       times: [],

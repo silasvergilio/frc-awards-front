@@ -9,26 +9,26 @@
           :to="menuItem.route"
         >
         <template v-slot:prepend>
-          <v-icon :icon="menuItem.icon"></v-icon>
+          <v-icon :icon="menuItem.icon" color="#C38C26"></v-icon>
         </template>
           <v-list-item-title>{{ menuItem.name }}</v-list-item-title>
         </v-list-item>
 
         <v-list-item v-if="user" @click="logout">
           <template v-slot:prepend>
-          <v-icon icon= 'mdi-logout'></v-icon>
+          <v-icon icon= 'mdi-logout' color="red"></v-icon>
         </template>
           <v-list-item-title>Logout</v-list-item-title>
         </v-list-item>
 
         <div class="drawer-logo">
-          <v-img max-width="100" :src="require('./assets/logo.png.webp')" />
+          <v-img max-width="100" :src="require('./assets/logo.png')" />
         </div>
       </v-list>
     </v-navigation-drawer>
 
     <!-- App Bar -->
-    <v-app-bar app color="#0083AE" dark>
+    <v-app-bar app color="#e5ae32" dark>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-toolbar-title><v-img
       src="@/assets/logo_text.png"
@@ -48,8 +48,14 @@
     </v-main>
 
     <!-- Footer -->
-    <v-footer app color="#ABD8E7">
-      <span class="white--text">&copy; 2025 - Silver Tech</span>
+    <v-footer app color="#598290">
+      <span class="white--text">&copy; 2026 - Silver Tech</span>
+      <v-img
+      src="@/assets/first_age_logo.png"
+      alt="FRC-Reefscape"
+      max-height="40"
+      max-width="300"
+      contain></v-img>
     </v-footer>
   </v-app>
 </template>
