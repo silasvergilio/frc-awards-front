@@ -78,10 +78,8 @@
 
 <script>
 import { ref, computed, onMounted } from "vue";
-import Loader from "./Loader.vue";
 
 export default {
-  components: { Loader },
   setup() {
     const dialog = ref(false);
     const times = ref([]);
