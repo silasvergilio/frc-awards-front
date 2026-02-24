@@ -8,58 +8,37 @@
       </v-card>
     </v-dialog>
 
-    <!-- Loader -->
-    <v-skeleton-loader
-  v-if="loader"
-  class="mx-auto mt-4"
-  type="table"
-  elevation="1"
-  :loading="loader"
->
-  <template #default>
-    <v-card flat>
-      <v-table>
-        <thead>
-          <tr>
-            <th class="text-left">Nome</th>
-            <th class="text-left">Número</th>
-            <th class="text-left">Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="n in 8" :key="n">
-            <td><v-skeleton-loader type="text" width="70%"></v-skeleton-loader></td>
-            <td><v-skeleton-loader type="text" width="40%"></v-skeleton-loader></td>
-            <td><v-skeleton-loader type="text" width="50%"></v-skeleton-loader></td>
-          </tr>
-        </tbody>
-      </v-table>
+    <v-card v-if="event" color="#598290" class="mx-auto" prepend-icon="mdi-robot" :subtitle=event.location>
+      <template v-slot:title>
+        <span class="font-weight-black">{{event.name}}</span>
+      </template>
+
     </v-card>
-  </template>
-</v-skeleton-loader>
-    <!-- Tabela de Times com hover e zebra stripes -->
-    <!-- <v-simple-table class="team-table">
-      <thead>
-        <tr>
-          <th class="text-left">Nome</th>
-          <th class="text-left">Número</th>
-          <th class="text-left">Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="(item, i) in times"
-          :key="item.value"
-          class="team-row"
-          :class="{ 'even-row': i % 2 === 1 }"
-          @click="openDialog(item)"
-        >
-          <td>{{ item.text }} <v-icon v-if="item.value >= 10000">mdi-star</v-icon></td>
-          <td>{{ item.value }}</td>
-          <td>{{ item.state }}</td>
-        </tr>
-      </tbody>
-    </v-simple-table> -->
+
+    <!-- Loader -->
+    <v-skeleton-loader v-if="loader" class="mx-auto mt-4" type="table" elevation="1" :loading="loader">
+      <template #default>
+        <v-card flat>
+          <v-table>
+            <thead>
+              <tr>
+                <th class="text-left">Nome</th>
+                <th class="text-left">Número</th>
+                <th class="text-left">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="n in 8" :key="n">
+                <td><v-skeleton-loader type="text" width="70%"></v-skeleton-loader></td>
+                <td><v-skeleton-loader type="text" width="40%"></v-skeleton-loader></td>
+                <td><v-skeleton-loader type="text" width="50%"></v-skeleton-loader></td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-card>
+      </template>
+    </v-skeleton-loader>
+
 
     <v-data-table v-else :headers="headers" :items="times" hover hide-default-footer :items-per-page="times.length">
       <template #item="{ item }">
@@ -77,23 +56,24 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
+import { useApi } from "@/composables/useApi";
+import { useEventStore } from "@/stores/eventStore";
 
 export default {
   setup() {
     const dialog = ref(false);
     const times = ref([]);
+    const event = ref(null); // 📌 para armazenar os dados do evento
     const index = ref(0);
     const loader = ref(false);
 
     const headers = [
       { title: 'Estado', value: 'state' },
       { title: 'Nome', value: 'text' },
-      { title: '# Time', value: 'value' },
+      { title: '#Time', value: 'value' },
       { title: 'Escola', value: 'school' },
     ];
-
-    const serverDomain = process.env.VUE_APP_SERVER_DOMAIN;
 
     const srcComputed = computed(() => {
       if (!times.value[index.value]) return null;
@@ -110,33 +90,66 @@ export default {
       dialog.value = true;
     };
 
+    const api = useApi();
+    const eventStore = useEventStore();
+
+    // 📌 Fetch de times
     const fetchTeams = async () => {
       loader.value = true;
       try {
-        const res = await fetch(`${serverDomain}/teams?image=true`, {
-          credentials: "include",
+        const result = await api.apiRequest('teams', {
+          method: "GET",
+          headers: { eventCode: eventStore.selectedEvent?.value }
         });
-        const json = await res.json();
-        times.value = json.sort((a, b) => Number(a.value) - Number(b.value));
-      } catch (err) {
-        console.error(err);
-      } finally {
-        loader.value = false;
+
+        times.value = result;
+        loader.value = false
+      } catch (error) {
+        console.error("Erro ao buscar times:", error.message);
       }
     };
 
-    onMounted(fetchTeams);
+    // 📌 Fetch do evento
+    const fetchEvent = async () => {
+      try {
+        const result = await api.apiRequest('events', {
+          method: "GET",
+          headers: { eventCode: eventStore.selectedEvent?.value }
+        });
+        event.value = result;
+      } catch (error) {
+        console.error("Erro ao buscar evento:", error.message);
+      }
+    };
 
-    return { dialog, times, index, loader, srcComputed, openDialog, headers };
-  },
+    // 📌 Função que chama ambas as APIs
+    const fetchData = async () => {
+      loader.value = true;
+      await Promise.all([fetchTeams(), fetchEvent()]);
+      loader.value = false;
+    };
+
+    // 🔁 Reativo: sempre que o evento mudar, recarrega times e dados do evento
+    watch(
+      () => eventStore.selectedEvent,
+      (newEvent, oldEvent) => {
+        if (newEvent?.value && newEvent?.value !== oldEvent?.value) {
+          fetchData();
+        }
+      },
+      { immediate: true }
+    );
+
+    return { dialog, times, event, index, loader, srcComputed, openDialog, headers };
+  }
 };
 </script>
 
 <style scoped>
-
 /* Para todas as linhas da tabela */
 .v-data-table tbody tr:hover {
-  background-color: #e0f7fa !important; /* substitua pela cor desejada */
+  background-color: #e0f7fa !important;
+  /* substitua pela cor desejada */
   cursor: pointer;
 }
 

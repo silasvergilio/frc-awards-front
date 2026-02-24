@@ -13,7 +13,7 @@
       color="#1E5AA8"
       variant="outlined"
       elevation="3"
-      @click="bulkAddTeam"
+      @click="checkEventState"
       :loading="loader"
     >
       Adicionar Times
@@ -51,9 +51,12 @@
 <script>
 import CardTitlePage from "./CardTitlePage.vue";
 import Loader from "./Loader.vue";
+import { useEventStore } from "@/stores/eventStore";
+
 
 export default {
   components: { CardTitlePage, Loader },
+  
 
   data() {
     return {
@@ -63,6 +66,13 @@ export default {
   },
 
   methods: {
+
+    checkEventState: () => {
+      console.log("Check")
+      const eventStore = useEventStore();
+      console.log("Evento atual:", eventStore.selectedEvent);
+    },  
+
     async bulkAddTeam() {
       try {
         this.loader = true;

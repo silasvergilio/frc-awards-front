@@ -1,113 +1,62 @@
 <template>
   <v-container fluid>
     <!-- Loader -->
-
-    <!-- Dialog de Imagem -->
-    <v-dialog v-model="dialog" max-width="400px">
-      <v-card v-if="currentTeam">
-        <v-card-title class="headline">{{ currentAward?.name.name }}</v-card-title>
-        <v-card-subtitle class="headline">{{ `${currentTeam.text} - ${currentTeam.value}` }}</v-card-subtitle>
-
-
-        <v-img v-if="currentTeam.imageLink" x :src="currentTeam.imageLink" max-height="250" />
-        <v-card-text v-else>
-          <b>Indicado por:</b> {{ currentTeam.judge }}<br />
-          <b>Descrição:</b> {{ currentTeam.motive }}
-        </v-card-text>
-
-        <v-card-actions v-if="isAdmin" class="flex-column">
-          <v-spacer />
-          <v-btn v-if="currentTeam.nominated" color="#F9A825" text @click="award(false)">
-            Retirar de consideração
-          </v-btn>
-          <v-btn v-else color="#F9A825" text @click="award(true)">
-            Considerar
-          </v-btn>
-          <v-btn color="#F9A825" text @click="deleteAward">
-            Deletar
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- Dialog de Imagem -->
-    <v-dialog v-model="dialogDescription" max-width="400px">
-      <v-card>
-        <v-card-title class="headline">{{ currentAward?.name.name }}</v-card-title>
-        <v-card-subtitle class="headline">Descrição Resumida</v-card-subtitle>
-
-        <v-card-text>
-          {{ currentAward.name.description }}
-        </v-card-text>
-
-        <v-card-actions v-if="isAdmin" class="flex-column">
-          <v-spacer />
-          <v-btn v-if="currentTeam.nominated" color="#F9A825" text @click="award(false)">
-            Retirar de consideração
-          </v-btn>
-          <v-btn v-else color="#F9A825" text @click="award(true)">
-            Considerar
-          </v-btn>
-          <v-btn color="#F9A825" text @click="deleteAward">
-            Deletar
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-skeleton-loader
-  v-if="loader"
-  class="mx-auto mt-4"
-  type="table"
-  elevation="1"
-  :loading="loader"
->
-  <template #default>
-    <v-card flat>
-      <v-table>
-        <thead>
-          <tr>
-            <th class="text-left">Prêmio</th>
-            <th class="text-left">Time</th>
-            <th class="text-left">Sala</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="n in 6" :key="n">
-            <td>
-              <v-skeleton-loader type="text" width="80%"></v-skeleton-loader>
-            </td>
-            <td>
-              <v-skeleton-loader type="text" width="60%"></v-skeleton-loader>
-            </td>
-            <td>
-              <v-skeleton-loader type="text" width="40%"></v-skeleton-loader>
-            </td>
-          </tr>
-        </tbody>
-      </v-table>
-    </v-card>
-  </template>
-</v-skeleton-loader>
+    <v-skeleton-loader v-if="loader" class="mx-auto mt-4" type="table" elevation="1" :loading="loader">
+      <template #default>
+        <v-card flat>
+          <v-table>
+            <thead>
+              <tr>
+                <th class="text-left">Prêmio</th>
+                <th class="text-left">Time</th>
+                <th class="text-left">Sala</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="n in 6" :key="n">
+                <td><v-skeleton-loader type="text" width="80%" /></td>
+                <td><v-skeleton-loader type="text" width="60%" /></td>
+                <td><v-skeleton-loader type="text" width="40%" /></td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-card>
+      </template>
+    </v-skeleton-loader>
 
     <!-- Grid de prêmios -->
     <v-row dense v-else>
-      <v-col v-for="(award, awardIndex) in items" :key="award.name" cols="12" sm="6" md="4" lg="3">
+      <v-col v-for="award in groupedAwards" :key="award.name" cols="12" sm="6" md="4" lg="3">
         <v-hover v-slot="{ isHover }">
           <v-card :elevation="isHover ? 12 : 4" class="award-card">
             <v-card-title class="card-title">
-              {{ award.name.name }}
-              <v-icon icon="mdi-information-outline" size="small" @click="displayAward(awardIndex)"></v-icon>
+              {{ award.name }}
+              <v-icon icon="mdi-information-outline" size="small" @click="displayAward(award)" />
             </v-card-title>
 
-            <v-list>
-              <v-list-item v-for="(team, teamIndex) in award.teams" :key="team.value"
-                @click="openDialog(team, awardIndex)" :class="[
+            <draggable v-if="isFTC" v-model="award.teams" item-key="Teams_idTeams" tag="v-list" handle=".drag-handle"
+              @end="onDragEnd(award)">
+              <template #item="{ element: team }">
+                <v-list-item @click="openDialog(team, award)" :class="[
                   team.nominated ? 'tile' : 'alreadyAwarded',
-                  positionClass(awardIndex, teamIndex)
+                  positionClass(team),
+                ]">
+                  <v-list-item-title>
+                    <v-icon icon="mdi-drag" size="small" class="mr-2 drag-handle" />
+                    <b>{{ team.teamName }} - {{ team.teamNumber }}</b>
+                  </v-list-item-title>
+                </v-list-item>
+              </template>
+            </draggable>
+
+            <v-list v-else>
+              <v-list-item v-for="team in award.teams" :key="team.Teams_idTeams" @click="openDialog(team, award)"
+                :class="[
+                  team.nominated ? 'tile' : 'alreadyAwarded',
+                  positionClass(team),
                 ]">
                 <v-list-item-title>
-                  <b>{{ team.value }} - {{ team.text }}</b>
+                  <b>{{ team.teamName }} - {{ team.teamNumber }}</b>
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -115,152 +64,214 @@
         </v-hover>
       </v-col>
     </v-row>
+
+    <!-- Dialog -->
+    <v-dialog v-model="dialog" max-width="400px">
+      <v-card v-if="currentTeam">
+        <v-card-title class="headline">
+          {{ currentAward?.name }}
+        </v-card-title>
+
+        <v-card-subtitle class="headline">
+          {{ `${currentTeam.teamName} - ${currentTeam.teamNumber}` }}
+        </v-card-subtitle>
+
+        <v-card-text>
+          <b>Indicado por:</b> {{ currentTeam.judge }}<br />
+          <b>Descrição:</b> {{ currentTeam.motive }}
+        </v-card-text>
+
+        <v-card-actions class="flex-column">
+          <v-btn color="#F9A825" text @click="toggleNomination(currentTeam, currentAward.name)">
+            {{ currentTeam.nominated ? "Retirar de consideração" : "Considerar" }}
+          </v-btn>
+          <v-btn color="#F9A825" text @click="deleteAward(currentTeam)">
+            Deletar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
+import { useApi } from "@/composables/useApi";
+import { useEventStore } from "@/stores/eventStore";
+import draggable from "vuedraggable";
 
 export default {
+  components: { draggable },
   setup() {
+    const api = useApi();
+    const eventStore = useEventStore();
+
+    const isFTC = computed(() => {
+      const event = eventStore.selectedEvent;
+      if (!event) return false;
+
+      // ajuste conforme seu modelo real
+      return event.program === "ftc";
+    });
+
     const loader = ref(false);
     const dialog = ref(false);
-    const dialogDescription = ref(false);
-    const items = ref([]);
-    const index = ref(0);
-    const awardIndex = ref(0);
+    const groupedAwards = ref([]);
 
-    const serverDomain = process.env.VUE_APP_SERVER_DOMAIN;
-    const user = ref(JSON.parse(localStorage.getItem("vuex"))?.user || {});
-    const isAdmin = computed(() => user.value?.permission === "Administrador");
+    const currentTeam = ref(null);
+    const currentAward = ref(null);
 
-    const currentAward = computed(() => items.value[awardIndex.value]);
-    const currentTeam = computed(() => currentAward.value?.teams[index.value]);
+    const onDragEnd = () => {
+      console.log("dragged")
+    }
 
-    const awardUrls = {
-      1: "Autonomous",
-      2: "Creativity",
-      3: "ExcellenceEngineering",
-      4: "IndustrialDesign",
-      5: "InnovationControl",
-      6: "Quality",
-      7: "EngineeringInspiration",
-      8: "Gracious",
-      9: "Imagery",
-      10: "Judges",
-      11: "Ras",
-      12: "RookieInspiration",
-      13: "TeamSpirit",
-      14: "TeamSustainability",
-    };
-
-    const awardsList = [
-      { "name": "Autonomous", "description": "Celebrates the team whose machine has demonstrated consistent, reliable, high-performance robot operation during autonomous (i.e. non-operated guided) actions during match play. Evaluation is based on the robot’s ability to sense its surroundings, position itself or onboard mechanisms appropriately, and execute tasks." },
-      { "name": "Creativity", "description": "Celebrates a creative robotic component, concept, or attribute that enhances strategy of play that was intentionally designed and not discovered." },
-      { "name": "Excellence in Engineering", "description": "Celebrates the team whose machine incorporates an engineering solution designed to have components work together seamlessly." },
-      { "name": "Industrial Design", "description": "Celebrates the team whose machine demonstrates industrial design principles, striking a balance between form, function, and aesthetics. " },
-      { "name": "Innovation in Control", "description": "Celebrates an innovative control system or application of control components – electrical, mechanical or software – to provide unique machine functions." },
-      { "name": "Quality", "description": "Celebrates machine robustness in concept and fabrication" },
-      { "name": "Engineering Inspiration", "description": "Celebrates a team who demonstrates outstanding success in advancing respect and appreciation for engineering within a team’s school or organization and community." },
-      { "name": "Gracious Professionalism", "description": "Celebrates outstanding demonstration of FIRST Core Values such as continuous Gracious Professionalism®, sportsmanship, and working together both on and off the playing field." },
-      { "name": "Imagery", "description": "In honor of Jack Kamen, Dean’s father, for his dedication to art and illustration and his devotion to FIRST. This award celebrates attractiveness in engineering and outstanding visual aesthetic integration of machine and team appearance." },
-      { "name": "Judges", "description": "During the course of the competition, the judging panel may decide a team’s unique efforts, performance, or dynamics merit recognition." },
-      { "name": "Rookie All Star", "description": "Celebrates the rookie team exemplifying a young but strong partnership effort, as well as implementing the mission of FIRST to inspire students to learn more about science and technology. ." },
-      { "name": "Rising All-Star", "description": "Celebrates the team that has persisted through challenges, despite the difficulties of being young. This could be the result of being a new team, or a team with recent turnover in membership." },
-      { "name": "Team Spirit", "description": "Celebrates extraordinary enthusiasm and spirit through exceptional partnership and teamwork furthering the objectives of FIRST." },
-      { "name": "Sustainability", "description": "Celebrates a team which has developed sustainable practices that focus on a “triple bottom line” (i.e. People, Prosperity, and Planet) to have a positive impact and achieve long-term continuity. " }
-    ];
     const fetchAwards = async () => {
+      if (!eventStore.selectedEvent?.value) return;
+
       loader.value = true;
+
       try {
-        const fetches = awardsList.map((name, i) =>
-          fetch(`${serverDomain}/awards/${awardUrls[i + 1]}`)
-            .then(res => res.json())
-            .then(json => ({ name, teams: json, value: i + 1 }))
-        );
-        items.value = await Promise.all(fetches);
-      } catch (err) {
-        console.error(err);
+        const result = await api.apiRequest("awards", {
+          method: "GET",
+          headers: { eventCode: eventStore.selectedEvent.value },
+        });
+
+        const teamStats = {};
+        const grouped = {};
+
+        // 1️⃣ Mapeia histórico corretamente por TIME
+        result.forEach((item) => {
+          const teamId = item.Teams_idTeams; // ✅ ID REAL DO TIME
+          if (!teamStats[teamId]) {
+            teamStats[teamId] = {
+              hasAE: false,
+              hasMCI: false,
+              hasThink: false,
+              teamNumber: item.teamNumber,
+              teamName: item.teamName,
+              nominated: true
+            };
+          }
+          if (item.category === "AE") teamStats[teamId].hasAE = true;
+          if (item.category === "MCI") teamStats[teamId].hasMCI = true;
+          if (item.awardName === "Think Award") {
+            teamStats[teamId].hasThink = true;
+          }
+
+          // agrupamento normal
+          if (!grouped[item.awardName]) {
+            grouped[item.awardName] = {
+              name: item.awardName,
+              teams: [],
+            };
+          }
+
+          grouped[item.awardName].teams.push(item);
+        });
+
+
+        // 2️⃣ Calcula Inspire (1 equipe = 1 entrada)
+        const inspireTeams = Object.values(teamStats)
+          .filter(
+            (team) =>
+              team.hasAE &&
+              team.hasMCI &&
+              team.hasThink
+          )
+        // 3️⃣ Cria ou remove Inspire
+        if (inspireTeams.length > 0) {
+          grouped["Inspire Award"] = {
+            name: "Inspire Award",
+            teams: inspireTeams,
+          };
+        } else {
+          delete grouped["Inspire Award"];
+        }
+
+        groupedAwards.value = Object.values(grouped);
+      } catch (error) {
+        console.error("Erro ao buscar prêmios:", error.message);
       } finally {
         loader.value = false;
       }
     };
 
-
-    const displayAward = (aIndex) => {
-      awardIndex.value = aIndex;
-      dialogDescription.value = true;
-    };
-
-    const openDialog = (team, aIndex) => {
-      awardIndex.value = aIndex;
-      index.value = items.value[aIndex].teams.findIndex(t => t.value === team.value);
+    const displayAward = (award) => {
+      currentAward.value = award;
       dialog.value = true;
     };
 
-    const positionClass = (aIndex, tIndex) => {
-      const team = items.value[aIndex].teams[tIndex];
+    const openDialog = (team, award) => {
+      currentTeam.value = team;
+      currentAward.value = award;
+      team.motive ? dialog.value = true : dialog.value = false;
+    };
+
+    const toggleNomination = async (team, award) => {
+      try {
+        await api.apiRequest(`awards`, {
+          method: "PUT",
+          body: JSON.stringify({
+            id: team.Teams_idTeams,
+            nominated: !team.nominated,
+            award: award
+          }),
+        });
+        team.nominated = !team.nominated;
+        dialog.value = !dialog.value
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    const deleteAward = async (team) => {
+      try {
+        await api.apiRequest("awards", {
+          method: "DELETE",
+          body: JSON.stringify({ id: team.Teams_idTime }),
+        });
+
+        const award = groupedAwards.value.find(
+          (a) => a.name === currentAward.value.name
+        );
+
+        award.teams = award.teams.filter(
+          (t) => t.Teams_idTime !== team.Teams_idTime
+        );
+
+        dialog.value = false;
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    const positionClass = (team) => {
       if (team.premiado) return "winner";
       return "";
     };
 
-    const award = async (intention) => {
-      loader.value = true;
-      const team = currentTeam.value;
-      const url = `${serverDomain}/awards/${awardUrls[currentAward.value.value]}`;
-
-      try {
-        await fetch(url, {
-          method: "PUT",
-          body: JSON.stringify({ nominated: intention, id: team.Teams_idTime }),
-          headers: { "Content-Type": "application/json" },
-        });
-        team.nominated = intention;
-      } catch (err) {
-        console.error(err);
-      } finally {
-        loader.value = false;
-        dialog.value = false;
+    watch(
+      () => eventStore.selectedEvent,
+      (newEvent, oldEvent) => {
+        if (newEvent?.value !== oldEvent?.value) fetchAwards();
       }
-    };
-
-    const deleteAward = async () => {
-      loader.value = true;
-      const team = currentTeam.value;
-      const url = `${serverDomain}/awards/${awardUrls[currentAward.value.value]}`;
-
-      try {
-        await fetch(url, {
-          method: "DELETE",
-          body: JSON.stringify({ id: team.Teams_idTime }),
-          headers: { "Content-Type": "application/json" },
-        });
-        items.value[awardIndex.value].teams.splice(index.value, 1);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        loader.value = false;
-        dialog.value = false;
-      }
-    };
+    );
 
     onMounted(fetchAwards);
 
     return {
-      items,
-      dialog,
+      isFTC,
       loader,
-      index,
-      awardIndex,
-      dialogDescription,
-      openDialog,
-      displayAward,
+      dialog,
+      groupedAwards,
       currentTeam,
       currentAward,
-      isAdmin,
-      award,
+      displayAward,
+      openDialog,
+      toggleNomination,
       deleteAward,
       positionClass,
+      onDragEnd
     };
   },
 };
@@ -268,10 +279,9 @@ export default {
 
 <style scoped>
 .card-title {
-  background-color: #F7CA5F;
+  background-color: #f7ca5f;
   display: flex;
   justify-content: space-between;
-  cursor: default;
 }
 
 .award-card {

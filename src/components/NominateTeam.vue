@@ -4,47 +4,37 @@
       <!-- Título com descrição -->
       <v-card elevation="2" class="pa-4">
         <v-card-title class="text-h6 font-weight-bold">
-          Indicar Time </v-card-title>
+          Indicar Time
+        </v-card-title>
 
         <!-- Loader -->
         <v-skeleton-loader v-if="loader" class="mx-auto mt-6 pa-4" type="card" elevation="2">
           <template #default>
             <v-card flat class="pa-4">
-              <!-- Título -->
               <v-skeleton-loader type="heading" width="60%" class="mb-6" />
-
-              <!-- Campo: Selecionar Time -->
-              <v-skeleton-loader type="text" width="30%" class="mb-2" />
               <v-skeleton-loader type="paragraph" width="100%" height="45px" class="mb-4" />
-
-              <!-- Campo: Selecionar Prêmio -->
-              <v-skeleton-loader type="text" width="30%" class="mb-2" />
               <v-skeleton-loader type="paragraph" width="100%" height="45px" class="mb-4" />
-
-              <!-- Campo: Selecionar Sala -->
-              <v-skeleton-loader type="text" width="30%" class="mb-2" />
               <v-skeleton-loader type="paragraph" width="100%" height="45px" class="mb-4" />
-
-              <!-- Botão Enviar -->
               <v-skeleton-loader type="button" width="150px" height="40px" class="mt-6" />
             </v-card>
           </template>
         </v-skeleton-loader>
+
         <!-- Seleções -->
         <v-row v-else>
           <v-col cols="12" md="4">
-            <v-combobox v-model="team" :items="times" item-title="text" item-value="value"
-              label="Selecione o time"></v-combobox>
+            <v-combobox v-model="team" :items="times" item-title="text" item-value="value" label="Selecione o time"
+              variant="solo-filled"></v-combobox>
           </v-col>
 
           <v-col cols="12" md="4">
             <v-combobox v-model="award" :items="premios" item-title="text" item-value="value" label="Selecione o prêmio"
-              outlined dense required></v-combobox>
+              outlined dense required variant="solo-filled"></v-combobox>
           </v-col>
 
           <v-col cols="12" md="4">
             <v-combobox v-model="room" :items="salas" item-title="text" label="Selecione a Dupla" outlined dense
-              required></v-combobox>
+              required variant="solo-filled"></v-combobox>
           </v-col>
         </v-row>
 
@@ -70,127 +60,138 @@
 </template>
 
 <script>
-import CardTitlePage from "./CardTitlePage.vue";
-import axios from "axios";
+import { ref, onMounted, watch } from "vue";
+import { useApi } from "@/composables/useApi";
+import { useEventStore } from "@/stores/eventStore";
+import { computed } from "vue";
 
 export default {
-  components: { CardTitlePage },
-  data() {
-    return {
-      times: [],
-      premios: [
-        { text: "Autonomous", value: 1 },
-        { text: "Creativity", value: 2 },
-        { text: "Excellence in Engineering", value: 3 },
-        { text: "Industrial Design", value: 4 },
-        { text: "Innovation in Control", value: 5 },
-        { text: "Quality", value: 6 },
-        { text: "Engineering Inspiration", value: 7 },
-        { text: "Gracious Professionalism", value: 8 },
-        { text: "Imagery", value: 9 },
-        { text: "Judges", value: 10 },
-        { text: "Rookie All Star", value: 11 },
-        { text: "Rising All Star", value: 12 },
-        { text: "Team Spirit", value: 13 },
-        { text: "Sustainability", value: 14 },
-      ],
-      salas: [
-        { text: "Kayan / Gilvan / Sabrina" },
-        { text: "Giovanni / Valter / Carlos" },
-        { text: "Karine / Carol / Nathalia" },
-        { text: "Silvio / Kelen" },
-        { text: "Match Observer" },
-        { text: "Outros" },
-      ],
-      team: null,
-      award: null,
-      room: null,
-      message: "",
-      myFileObject: null,
-      loader: false,
-      serverDomain: process.env.VUE_APP_SERVER_DOMAIN,
+  setup() {
+    const team = ref(null);
+    const award = ref(null);
+    const room = ref(null);
+    const message = ref("");
+    const times = ref([]);
+    const loader = ref(false);
+
+
+    const premiosFRC = [
+      { text: "Autonomous", value: 1, category: "MCI" },
+      { text: "Creativity", value: 2, category: "MCI" },
+      { text: "Excellence in Engineering", value: 3, category: "MCI" },
+      { text: "Industrial Design", value: 4, category: "MCI" },
+      { text: "Innovation in Control", value: 5, category: "MCI" },
+      { text: "Quality", value: 6, category: "MCI" },
+      { text: "Engineering Inspiration", value: 7, category: "AE" },
+      { text: "Gracious Professionalism", value: 8, category: "AE" },
+      { text: "Imagery", value: 9, category: "AE" },
+      { text: "Judges", value: 10, category: "AE" },
+      { text: "Rookie All Star", value: 11, category: "AE" },
+      { text: "Rising All Star", value: 12, category: "AE" },
+      { text: "Team Spirit", value: 13, category: "AE" },
+      { text: "Sustainability", value: 14, category: "AE" },
+    ];
+
+    const premiosFTC = [
+      { text: "Think Award", value: 2, category: "MCI" },
+      { text: "Connect Award", value: 3, category: "AE" },
+      { text: "Innovate Award", value: 4, category: "MCI" },
+      { text: "Design Award", value: 5, category: "MCI" },
+      { text: "Control Award", value: 6, category: "MCI" },
+      { text: "Reach Award", value: 6, category: "AE" },
+      { text: "Sustain Award", value: 6, category: "AE" },
+     
+    ];
+
+    const salas = [
+      { text: "Sala A" },
+      { text: "Sala B" },
+   
+    ];
+
+    const api = useApi();
+    const eventStore = useEventStore();
+
+    const premios = computed(() => {
+      if (!eventStore.selectedEvent?.value) return [];
+
+      // ajuste essa condição ao seu modelo real de evento
+
+      if (eventStore.selectedEvent.program == "ftc") {
+        return premiosFTC;
+      }
+
+      return premiosFRC;
+    });
+
+    const fetchTeams = async () => {
+      if (!eventStore.selectedEvent?.value) return;
+
+      loader.value = true;
+      try {
+        const result = await api.apiRequest("teams", {
+          method: "GET",
+          headers: { eventCode: eventStore.selectedEvent.value },
+        });
+
+        // transforma os times para o combobox
+        times.value = (result.data || result).map((t) => ({
+          value: t.value,
+          text: t.text,
+          state: t.state,
+          school: t.school,
+        }));
+      } catch (error) {
+        console.error("Erro ao buscar times:", error.message);
+      } finally {
+        loader.value = false;
+      }
     };
-  },
-  methods: {
-    onFileChange(e) {
-      this.myFileObject = e;
-    },
-    indicaTime() {
-      if (!this.team || !this.award || !this.room || !this.message) {
+
+    // Chama a API ao montar
+    onMounted(fetchTeams);
+
+    // Atualiza times automaticamente quando o evento mudar
+    watch(
+      () => eventStore.selectedEvent,
+      (newEvent, oldEvent) => {
+        if (newEvent?.value !== oldEvent?.value) fetchTeams();
+      }
+    );
+
+    const indicaTime = async () => {
+      if (!team.value || !award.value || !room.value || !message.value) {
         alert("Preencha todos os campos antes de enviar.");
         return;
       }
 
-      const formData = new FormData();
-      if (this.myFileObject) formData.append("file", this.myFileObject);
-
-      const requisicao = {
-        value: this.team.value,
-        text: this.team.text,
-        motive: this.message,
-        judge: this.room.text,
-      };
-      formData.append("bodyReq", JSON.stringify(requisicao));
-
-      let url = "";
-      switch (this.award.value) {
-        case 1: url = `${this.serverDomain}/awards/Autonomous`; break;
-        case 2: url = `${this.serverDomain}/awards/Creativity`; break;
-        case 3: url = `${this.serverDomain}/awards/ExcellenceEngineering`; break;
-        case 4: url = `${this.serverDomain}/awards/IndustrialDesign`; break;
-        case 5: url = `${this.serverDomain}/awards/InnovationControl`; break;
-        case 6: url = `${this.serverDomain}/awards/Quality`; break;
-        case 7: url = `${this.serverDomain}/awards/EngineeringInspiration`; break;
-        case 8: url = `${this.serverDomain}/awards/Gracious`; break;
-        case 10: url = `${this.serverDomain}/awards/Judges`; break;
-        case 11: url = `${this.serverDomain}/awards/Ras`; break;
-        case 12: url = `${this.serverDomain}/awards/RookieInspiration`; break;
-        case 12: url = `${this.serverDomain}/awards/TeamSpirit`; break;
-        case 14: url = `${this.serverDomain}/awards/TeamSustainability`; break;
-      }
-
-      this.loader = true;
-
-      axios
-        .post(url, formData)
-        .then(() => {
-          this.loader = false;
-          this.$refs.form.reset();
-          this.team = null;
-          this.award = null;
-          this.room = null;
-          this.message = "";
-          this.myFileObject = null;
-        })
-        .catch((err) => {
-          console.error(err);
-          this.loader = false;
-          alert("Erro ao enviar indicação!");
+      try {
+        const result = await api.apiRequest("awards", {
+          method: "POST",
+          headers: { eventCode: eventStore.selectedEvent.value },
+          body: JSON.stringify({
+            awardName: award.value.text,
+            motive: message.value,
+            judge: room.value.text,
+            category: award.value.category,
+            value: team.value.value
+          })
         });
-    },
+
+
+
+      } catch (error) {
+        console.error("Erro ao enviar submissão times:", error.message);
+      } finally {
+        team.value = null;
+        award.value = null;
+        room.value = null;
+        message.value = "";
+        loader.value = false;
+      }
+    };
+
+    return { team, award, room, message, times, loader, premios, salas, indicaTime };
   },
-  created() {
-    this.loader = true;
-    fetch(
-      process.env.VUE_APP_SERVER_DOMAIN + "/teams",
-      { credentials: "include" }
-    )
-      .then((response) => response.json())
-      .then((json) => {
-        this.loader = false;
-
-        // Transformando cada item para ter 'text' como string legível e 'value' como id
-        this.times = json.map((t) => ({
-          value: t.value, // id ou número do time
-          text: typeof t.text === "string" ? `${t.value} - ${t.text}` : `${t.value} - ${t.text.name}`, // ajusta caso t.text seja objeto
-        }));
-
-        //        console.log("Times processados:", this.times); // para conferir no console
-      })
-      .catch((err) => {
-        this.loader = false;
-        console.error("Erro ao carregar times:", err);
-      });
-  }
 };
 </script>

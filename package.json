@@ -3,7 +3,7 @@
   "version": "3.0.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "dev": "vue-cli-service serve",
     "build": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -14,6 +14,8 @@
     "axios": "^1.6.7",
     "core-js": "^3.31.1",
     "dotenv": "^16.4.7",
+    "pinia": "^3.0.3",
+    "pinia-plugin-persistedstate": "^4.5.0",
     "pouchdb": "^7.1.1",
     "pouchdb-browser": "^7.1.1",
     "print-js": "^1.0.63",
