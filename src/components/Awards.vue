@@ -35,7 +35,7 @@
             </v-card-title>
 
             <draggable v-if="isFTC" v-model="award.teams" item-key="Teams_idTeams" tag="v-list" handle=".drag-handle"
-              @end="onDragEnd(award)">
+              @end="onDragEnd($event, award)">
               <template #item="{ element: team }">
                 <v-list-item @click="openDialog(team, award)" :class="[
                   team.nominated ? 'tile' : 'alreadyAwarded',
@@ -85,7 +85,7 @@
           <v-btn color="#F9A825" text @click="toggleNomination(currentTeam, currentAward.name)">
             {{ currentTeam.nominated ? "Retirar de consideração" : "Considerar" }}
           </v-btn>
-          <v-btn color="#F9A825" text @click="deleteAward(currentTeam)">
+          <v-btn color="#F9A825" text @click="deleteAward(currentTeam, currentAward.name)">
             Deletar
           </v-btn>
         </v-card-actions>
@@ -121,9 +121,30 @@ export default {
     const currentTeam = ref(null);
     const currentAward = ref(null);
 
-    const onDragEnd = () => {
-      console.log("dragged")
-    }
+    const onDragEnd = async (evt, award) => {
+      /*
+        evt.oldIndex → posição antiga
+        evt.newIndex → posição nova
+        award        → prêmio onde ocorreu o drag
+      */
+
+      const movedTeam = award.teams[evt.newIndex];
+
+      const payload = {
+        awardName: award.name,
+        teamId: movedTeam.Teams_idTeams,
+        newOrder: evt.newIndex + 1, // geralmente começa em 1 no banco
+      };
+
+      try {
+        await api.apiRequest("awards/order", {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        });
+      } catch (error) {
+        console.error("Erro ao salvar nova ordem", error);
+      }
+    };
 
     const fetchAwards = async () => {
       if (!eventStore.selectedEvent?.value) return;
@@ -224,19 +245,22 @@ export default {
       }
     };
 
-    const deleteAward = async (team) => {
+    const deleteAward = async (team,award ) => {
       try {
-        await api.apiRequest("awards", {
+        await api.apiRequest(`awards`, {
           method: "DELETE",
-          body: JSON.stringify({ id: team.Teams_idTime }),
+          body: JSON.stringify({
+            id: team.Teams_idTeams,
+            award: award
+          }),
         });
 
-        const award = groupedAwards.value.find(
+        const awardDeleted = groupedAwards.value.find(
           (a) => a.name === currentAward.value.name
         );
 
-        award.teams = award.teams.filter(
-          (t) => t.Teams_idTime !== team.Teams_idTime
+        awardDeleted.teams = awardDeleted.teams.filter(
+          (t) => t.Teams_idTeams !== team.Teams_idTeams
         );
 
         dialog.value = false;
