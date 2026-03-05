@@ -121,31 +121,19 @@ export default {
     const currentTeam = ref(null);
     const currentAward = ref(null);
 
-    const onDragEnd = async (evt, award) => {
-      /*
-        evt.oldIndex → posição antiga
-        evt.newIndex → posição nova
-        award        → prêmio onde ocorreu o drag
-      */
+    const onDragEnd = async (event, awardTeams) => {
+    const payload = awardTeams.teams.map((team, index) => ({
+    id: team.idAwards,
+    order: index
+  }));
 
-      const movedTeam = award.teams[evt.newIndex];
-
-      const payload = {
-        awardName: award.name,
-        teamId: movedTeam.Teams_idTeams,
-        newOrder: evt.newIndex + 1, // geralmente começa em 1 no banco
-      };
-
-      try {
-        await api.apiRequest("awards/order", {
-          method: "PUT",
-          body: JSON.stringify(payload),
-        });
-      } catch (error) {
-        console.error("Erro ao salvar nova ordem", error);
-      }
-    };
-
+  console.log("Evento", event);
+  console.log("payload", payload)
+  await api.apiRequest("awards/order", {
+    method: "PUT",
+    body: JSON.stringify({ awards: payload })   // 👈 aqui
+  });
+};
     const fetchAwards = async () => {
       if (!eventStore.selectedEvent?.value) return;
 

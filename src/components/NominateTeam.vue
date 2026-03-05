@@ -22,14 +22,15 @@
 
         <!-- Seleções -->
         <v-row v-else>
-          <v-col cols="12" md="4">
-            <v-combobox v-model="team" :items="times" item-title="text" item-value="value" label="Selecione o time"
-              variant="solo-filled"></v-combobox>
-          </v-col>
 
           <v-col cols="12" md="4">
             <v-combobox v-model="award" :items="premios" item-title="text" item-value="value" label="Selecione o prêmio"
               outlined dense required variant="solo-filled"></v-combobox>
+          </v-col>
+
+          <v-col cols="12" md="4">
+            <v-combobox v-model="team" :items="times" item-title="text" item-value="value" label="Selecione o time"
+              variant="solo-filled"></v-combobox>
           </v-col>
 
           <v-col cols="12" md="4">
@@ -100,13 +101,13 @@ export default {
       { text: "Control Award", value: 6, category: "MCI" },
       { text: "Reach Award", value: 6, category: "AE" },
       { text: "Sustain Award", value: 6, category: "AE" },
-     
+
     ];
 
     const salas = [
       { text: "Sala A" },
       { text: "Sala B" },
-   
+
     ];
 
     const api = useApi();
