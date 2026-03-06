@@ -38,7 +38,7 @@
               @end="onDragEnd($event, award)">
               <template #item="{ element: team }">
                 <v-list-item @click="openDialog(team, award)" :class="[
-                  team.awarded ? 'winner' : team.nominated ? 'tile' : 'alreadyAwarded' ,
+                  team.awarded ? 'winner' : team.nominated ? 'tile' : 'alreadyAwarded',
                   positionClass(team),
                 ]">
                   <v-list-item-title>
@@ -52,7 +52,7 @@
             <v-list v-else>
               <v-list-item v-for="team in award.teams" :key="team.Teams_idTeams" @click="openDialog(team, award)"
                 :class="[
-                  team.nominated ? 'tile' : !team.awarded ?  'alreadyAwarded' : 'winner' ,
+                  team.nominated ? 'tile' : !team.awarded ? 'alreadyAwarded' : 'winner',
                   positionClass(team),
                 ]">
                 <v-list-item-title>
@@ -80,6 +80,10 @@
           <b>Indicado por:</b> {{ currentTeam.judge }}<br />
           <b>Descrição:</b> {{ currentTeam.motive }}
         </v-card-text>
+
+        <v-img v-if="currentTeam.imagePath" :src="apiBase + currentTeam.imagePath" max-height="220" contain
+          class="mb-3" />
+
 
         <v-card-actions class="flex-column">
           <v-btn v-if="!isFTC" color="#F9A825" text @click="toggleNomination(currentTeam, currentAward.name)">
@@ -111,6 +115,7 @@ export default {
   setup() {
     const api = useApi();
     const eventStore = useEventStore();
+    const apiBase = process.env.VUE_APP_SERVER_DOMAIN
 
     const isFTC = computed(() => {
       const event = eventStore.selectedEvent;
@@ -128,18 +133,18 @@ export default {
     const currentAward = ref(null);
 
     const onDragEnd = async (event, awardTeams) => {
-    const payload = awardTeams.teams.map((team, index) => ({
-    id: team.idAwards,
-    order: index
-  }));
+      const payload = awardTeams.teams.map((team, index) => ({
+        id: team.idAwards,
+        order: index
+      }));
 
-  console.log("Evento", event);
-  console.log("payload", payload)
-  await api.apiRequest("awards/order", {
-    method: "PUT",
-    body: JSON.stringify({ awards: payload })   // 👈 aqui
-  });
-};
+      console.log("Evento", event);
+      console.log("payload", payload)
+      await api.apiRequest("awards/order", {
+        method: "PUT",
+        body: JSON.stringify({ awards: payload })   // 👈 aqui
+      });
+    };
     const fetchAwards = async () => {
       if (!eventStore.selectedEvent?.value) return;
 
@@ -259,7 +264,7 @@ export default {
     };
 
 
-    const deleteAward = async (team,award ) => {
+    const deleteAward = async (team, award) => {
       try {
         await api.apiRequest(`awards`, {
           method: "DELETE",
@@ -298,6 +303,7 @@ export default {
     onMounted(fetchAwards);
 
     return {
+      apiBase,
       isFTC,
       loader,
       dialog,

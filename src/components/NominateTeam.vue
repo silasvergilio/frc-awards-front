@@ -45,13 +45,13 @@
             <v-textarea v-model="message" label="Justificativa" outlined dense></v-textarea>
           </v-col>
         </v-row>
-<!-- 
+
         <v-row v-if="!loader">
           <v-col cols="12" md="6">
             <v-file-input v-model="image" label="Enviar imagem (opcional)" accept="image/*" prepend-icon="mdi-camera"
               variant="solo-filled" show-size></v-file-input>
           </v-col>
-        </v-row> -->
+        </v-row>
 
         <!-- Botão de envio -->
         <v-row v-if="!loader">
