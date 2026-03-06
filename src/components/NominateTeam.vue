@@ -34,8 +34,8 @@
           </v-col>
 
           <v-col cols="12" md="4">
-            <v-combobox v-model="room" :items="salas" item-title="text" label="Selecione a Dupla" outlined dense
-              required variant="solo-filled"></v-combobox>
+            <v-combobox v-model="room" :items="isFTC ? salasFTC : salasFRC" item-title="text" label="Selecione a Dupla"
+              outlined dense required variant="solo-filled"></v-combobox>
           </v-col>
         </v-row>
 
@@ -45,6 +45,13 @@
             <v-textarea v-model="message" label="Justificativa" outlined dense></v-textarea>
           </v-col>
         </v-row>
+<!-- 
+        <v-row v-if="!loader">
+          <v-col cols="12" md="6">
+            <v-file-input v-model="image" label="Enviar imagem (opcional)" accept="image/*" prepend-icon="mdi-camera"
+              variant="solo-filled" show-size></v-file-input>
+          </v-col>
+        </v-row> -->
 
         <!-- Botão de envio -->
         <v-row v-if="!loader">
@@ -74,6 +81,7 @@ export default {
     const message = ref("");
     const times = ref([]);
     const loader = ref(false);
+    const image = ref(null);
 
 
     const premiosFRC = [
@@ -104,14 +112,37 @@ export default {
 
     ];
 
-    const salas = [
+    const salasFTC = [
       { text: "Sala A" },
       { text: "Sala B" },
+      { text: "Sala C" },
+      { text: "Sala D" },
+      { text: "Sala E" },
+    ];
+
+    const salasFRC = [
+      { text: "Valter / Arthur" },
+      { text: "Flaudilenio / Isabela" },
+      { text: "Vitor / Fabio" },
+      { text: "Mariana / Yuri" },
+      { text: "Karine / Gabriel" },
+      { text: "Felipe / Lubia" },
+      { text: "Vanessa / Juliane" },
+      { text: "Simone / Willian" },
 
     ];
 
     const api = useApi();
     const eventStore = useEventStore();
+
+
+    const isFTC = computed(() => {
+      const event = eventStore.selectedEvent;
+      if (!event) return false;
+
+      // ajuste conforme seu modelo real
+      return event.program === "ftc";
+    });
 
     const premios = computed(() => {
       if (!eventStore.selectedEvent?.value) return [];
@@ -161,25 +192,31 @@ export default {
     );
 
     const indicaTime = async () => {
+
       if (!team.value || !award.value || !room.value || !message.value) {
         alert("Preencha todos os campos antes de enviar.");
         return;
       }
 
       try {
-        const result = await api.apiRequest("awards", {
+
+        const formData = new FormData();
+
+        formData.append("awardName", award.value.text);
+        formData.append("motive", message.value);
+        formData.append("judge", room.value.text);
+        formData.append("category", award.value.category);
+        formData.append("value", team.value.value);
+
+        if (image.value) {
+          formData.append("image", image.value);
+        }
+
+        await api.apiRequest("awards", {
           method: "POST",
           headers: { eventCode: eventStore.selectedEvent.value },
-          body: JSON.stringify({
-            awardName: award.value.text,
-            motive: message.value,
-            judge: room.value.text,
-            category: award.value.category,
-            value: team.value.value
-          })
+          body: formData
         });
-
-
 
       } catch (error) {
         console.error("Erro ao enviar submissão times:", error.message);
@@ -188,11 +225,11 @@ export default {
         award.value = null;
         room.value = null;
         message.value = "";
-        loader.value = false;
+        image.value = null;
       }
     };
 
-    return { team, award, room, message, times, loader, premios, salas, indicaTime };
+    return { team, award, room, message, times, loader, premios, salasFTC, salasFRC, isFTC, image, indicaTime };
   },
 };
 </script>

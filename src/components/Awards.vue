@@ -38,7 +38,7 @@
               @end="onDragEnd($event, award)">
               <template #item="{ element: team }">
                 <v-list-item @click="openDialog(team, award)" :class="[
-                  team.nominated ? 'tile' : 'alreadyAwarded',
+                  team.awarded ? 'winner' : team.nominated ? 'tile' : 'alreadyAwarded' ,
                   positionClass(team),
                 ]">
                   <v-list-item-title>
@@ -52,7 +52,7 @@
             <v-list v-else>
               <v-list-item v-for="team in award.teams" :key="team.Teams_idTeams" @click="openDialog(team, award)"
                 :class="[
-                  team.nominated ? 'tile' : 'alreadyAwarded',
+                  team.nominated ? 'tile' : !team.awarded ?  'alreadyAwarded' : 'winner' ,
                   positionClass(team),
                 ]">
                 <v-list-item-title>
@@ -82,9 +82,15 @@
         </v-card-text>
 
         <v-card-actions class="flex-column">
-          <v-btn color="#F9A825" text @click="toggleNomination(currentTeam, currentAward.name)">
+          <v-btn v-if="!isFTC" color="#F9A825" text @click="toggleNomination(currentTeam, currentAward.name)">
             {{ currentTeam.nominated ? "Retirar de consideração" : "Considerar" }}
           </v-btn>
+
+          <v-btn v-if="isFTC" color="#F9A825" text @click="toggleAward(currentTeam, currentAward.name)">
+            {{ currentTeam.awarded ? "Tirar premiação" : "Premiar" }}
+          </v-btn>
+
+
           <v-btn color="#F9A825" text @click="deleteAward(currentTeam, currentAward.name)">
             Deletar
           </v-btn>
@@ -233,6 +239,26 @@ export default {
       }
     };
 
+    const toggleAward = async (team, award) => {
+      try {
+        await api.apiRequest(`awards/awarded`, {
+          method: "PUT",
+          body: JSON.stringify({
+            id: team.Teams_idTeams,
+            awarded: !team.awarded,
+            award: award
+          }),
+        });
+        team.awarded = !team.awarded;
+        fetchAwards()
+        dialog.value = !dialog.value
+
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+
     const deleteAward = async (team,award ) => {
       try {
         await api.apiRequest(`awards`, {
@@ -283,7 +309,8 @@ export default {
       toggleNomination,
       deleteAward,
       positionClass,
-      onDragEnd
+      onDragEnd,
+      toggleAward
     };
   },
 };

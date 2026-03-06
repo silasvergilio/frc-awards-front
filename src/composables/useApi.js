@@ -16,7 +16,17 @@ export function useApi() {
      */
     const apiRequest = async (url, options = {}, requireAuth = true) => {
         try {
-            const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+
+            const isFormData = options.body instanceof FormData;
+
+            const headers = {
+                ...(options.headers || {})
+            };
+
+            // só define JSON se NÃO for upload
+            if (!isFormData) {
+                headers["Content-Type"] = "application/json";
+            }
 
             // 🔐 Adiciona o token do Auth0, se necessário
             if (requireAuth && isAuthenticated.value) {
@@ -56,6 +66,7 @@ export function useApi() {
             } catch {
                 return null;
             }
+
         } catch (err) {
             showMessage(`Falha na comunicação: ${err.message}`, "error");
             throw err;
