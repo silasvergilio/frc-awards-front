@@ -94,10 +94,10 @@
             {{ currentTeam.awarded ? "Tirar premiação" : "Premiar" }}
           </v-btn>
 
-
+<!-- 
           <v-btn color="#F9A825" text @click="deleteAward(currentTeam, currentAward.name)">
             Deletar
-          </v-btn>
+          </v-btn> -->
         </v-card-actions>
       </v-card>
     </v-dialog>
