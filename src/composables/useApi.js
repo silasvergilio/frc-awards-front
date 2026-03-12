@@ -37,7 +37,7 @@ export function useApi() {
                 headers.Authorization = `Bearer ${token}`;
             }
 
-            const response = await fetch(`${process.env.VUE_APP_SERVER_DOMAIN}/${url}`, {
+            const response = await fetch(`${process.env.VUE_APP_SERVER_DOMAIN}/api/${url}`, {
                 ...options,
                 headers,
             });
