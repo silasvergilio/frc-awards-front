@@ -212,6 +212,8 @@ export default {
           formData.append("image", image.value);
         }
 
+        loader.value = true;
+
         await api.apiRequest("awards", {
           method: "POST",
           headers: { eventCode: eventStore.selectedEvent.value },
@@ -226,6 +228,7 @@ export default {
         room.value = null;
         message.value = "";
         image.value = null;
+        loader.value = false;
       }
     };
 

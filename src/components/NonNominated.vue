@@ -39,103 +39,102 @@
           Times não indicados </v-card-title>
 
         <!-- Tabela -->
-        <v-data-table :headers="headers" hover :items="times"   :items-per-page="-1"
-        hide-default-footer class="team-table"
-          @click:row="openDialog" />
+        <v-data-table :headers="headers" hover :items="times" :items-per-page="-1" hide-default-footer
+          class="team-table" @click:row="openDialog" />
       </v-card>
     </v-container>
   </div>
 </template>
 
 <script>
-  import { ref, computed, onMounted, watch } from "vue";
-  import { useApi } from "@/composables/useApi";
-  import { useEventStore } from "@/stores/eventStore";
-  
-  export default {
-    setup() {
-      const dialog = ref(false);
-      const times = ref([]);
-      const event = ref(null); // 📌 para armazenar os dados do evento
-      const index = ref(0);
-      const loader = ref(false);
-  
-      const headers = [
-        { title: 'Estado', value: 'state' },
-        { title: 'Nome', value: 'text' },
-        { title: '#Time', value: 'value' },
-        { title: 'Escola', value: 'school' },
-      ];
-  
-      const srcComputed = computed(() => {
-        if (!times.value[index.value]) return null;
-        try {
-          return require(`../assets/fotos_times/${times.value[index.value].value}.jpg`);
-        } catch {
-          return require("../assets/fotos_times/standard.webp");
+import { ref, computed, onMounted, watch } from "vue";
+import { useApi } from "@/composables/useApi";
+import { useEventStore } from "@/stores/eventStore";
+
+export default {
+  setup() {
+    const dialog = ref(false);
+    const times = ref([]);
+    const event = ref(null); // 📌 para armazenar os dados do evento
+    const index = ref(0);
+    const loader = ref(false);
+
+    const headers = [
+      { title: 'Estado', value: 'state' },
+      { title: 'Nome', value: 'text' },
+      { title: '#Time', value: 'value' },
+      { title: 'Escola', value: 'school' },
+    ];
+
+    const srcComputed = computed(() => {
+      if (!times.value[index.value]) return null;
+      try {
+        return require(`../assets/fotos_times/${times.value[index.value].value}.jpg`);
+      } catch {
+        return require("../assets/fotos_times/standard.webp");
+      }
+    });
+
+    const openDialog = (item) => {
+      const i = times.value.findIndex((t) => t.value === item.value);
+      index.value = i;
+      dialog.value = true;
+    };
+
+    const api = useApi();
+    const eventStore = useEventStore();
+
+    // 📌 Fetch de times
+    const fetchTeams = async () => {
+      loader.value = true;
+      try {
+        const result = await api.apiRequest('awards/non-nominated/teams', {
+          method: "GET",
+          headers: { eventCode: eventStore.selectedEvent?.value }
+        });
+
+        times.value = result;
+        loader.value = false
+      } catch (error) {
+        console.error("Erro ao buscar times:", error.message);
+      }
+    };
+
+    // 📌 Fetch do evento
+    const fetchEvent = async () => {
+      try {
+        const result = await api.apiRequest('events', {
+          method: "GET",
+          headers: { eventCode: eventStore.selectedEvent?.value }
+        });
+        event.value = result;
+      } catch (error) {
+        console.error("Erro ao buscar evento:", error.message);
+      }
+    };
+
+    // 📌 Função que chama ambas as APIs
+    const fetchData = async () => {
+      loader.value = true;
+      await Promise.all([fetchTeams(), fetchEvent()]);
+      loader.value = false;
+    };
+
+    // 🔁 Reativo: sempre que o evento mudar, recarrega times e dados do evento
+    watch(
+      () => eventStore.selectedEvent,
+      (newEvent, oldEvent) => {
+        if (newEvent?.value && newEvent?.value !== oldEvent?.value) {
+          fetchData();
         }
-      });
-  
-      const openDialog = (item) => {
-        const i = times.value.findIndex((t) => t.value === item.value);
-        index.value = i;
-        dialog.value = true;
-      };
-  
-      const api = useApi();
-      const eventStore = useEventStore();
-  
-      // 📌 Fetch de times
-      const fetchTeams = async () => {
-        loader.value = true;
-        try {
-          const result = await api.apiRequest('awards/non-nominated/teams', {
-            method: "GET",
-            headers: { eventCode: eventStore.selectedEvent?.value }
-          });
-  
-          times.value = result;
-          loader.value = false
-        } catch (error) {
-          console.error("Erro ao buscar times:", error.message);
-        }
-      };
-  
-      // 📌 Fetch do evento
-      const fetchEvent = async () => {
-        try {
-          const result = await api.apiRequest('events', {
-            method: "GET",
-            headers: { eventCode: eventStore.selectedEvent?.value }
-          });
-          event.value = result;
-        } catch (error) {
-          console.error("Erro ao buscar evento:", error.message);
-        }
-      };
-  
-      // 📌 Função que chama ambas as APIs
-      const fetchData = async () => {
-        loader.value = true;
-        await Promise.all([fetchTeams(), fetchEvent()]);
-        loader.value = false;
-      };
-  
-      // 🔁 Reativo: sempre que o evento mudar, recarrega times e dados do evento
-      watch(
-        () => eventStore.selectedEvent,
-        (newEvent, oldEvent) => {
-          if (newEvent?.value && newEvent?.value !== oldEvent?.value) {
-            fetchData();
-          }
-        },
-        { immediate: true }
-      );
-  
-      return { dialog, times, event, index, loader, srcComputed, openDialog, headers };
-    }
-  };
-  </script>
+      },
+      { immediate: true }
+    );
+
+    return { dialog, times, event, index, loader, srcComputed, openDialog, headers };
+  }
+};
+</script>
 
 <style scoped>
 .card-title {

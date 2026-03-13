@@ -94,10 +94,10 @@
             {{ currentTeam.awarded ? "Tirar premiação" : "Premiar" }}
           </v-btn>
 
-<!-- 
-          <v-btn color="#F9A825" text @click="deleteAward(currentTeam, currentAward.name)">
+
+          <v-btn  color="#F9A825" text @click="deleteAward(currentTeam, currentAward.name)">
             Deletar
-          </v-btn> -->
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -109,6 +109,8 @@ import { ref, onMounted, watch, computed } from "vue";
 import { useApi } from "@/composables/useApi";
 import { useEventStore } from "@/stores/eventStore";
 import draggable from "vuedraggable";
+
+
 
 export default {
   components: { draggable },
@@ -124,6 +126,8 @@ export default {
       // ajuste conforme seu modelo real
       return event.program === "ftc";
     });
+
+ 
 
     const loader = ref(false);
     const dialog = ref(false);
