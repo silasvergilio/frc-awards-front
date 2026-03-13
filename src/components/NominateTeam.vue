@@ -121,14 +121,14 @@ export default {
     ];
 
     const salasFRC = [
-      { text: "Valter / Arthur" },
-      { text: "Flaudilenio / Isabela" },
-      { text: "Vitor / Fabio" },
-      { text: "Mariana / Yuri" },
-      { text: "Karine / Gabriel" },
-      { text: "Felipe / Lubia" },
-      { text: "Vanessa / Juliane" },
-      { text: "Simone / Willian" },
+      { text: "Ayslan / Luiz" },
+      { text: "Antonio / JP" },
+      { text: "Leo / Beatriz" },
+      { text: "Eduardo / Carlos" },
+      { text: "Thiago / Juliane" },
+      { text: "Francisco / Erika" },
+      { text: "Arthur / Sara" },
+      { text: "Ivan / Duda" },
 
     ];
 
@@ -169,7 +169,7 @@ export default {
         // transforma os times para o combobox
         times.value = (result.data || result).map((t) => ({
           value: t.value,
-          text: t.text,
+          text: `${t.value} - ${t.text}`,
           state: t.state,
           school: t.school,
         }));
